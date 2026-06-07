@@ -134,8 +134,8 @@ export default function AdminDashboard() {
       parentPhone: parentPhone.trim(),
       totalFee: Number(customTotalFee) || 15000,
       paidFee: Number(initialPaid) || 0,
-      seatNumber: classGrade === 'Library' ? seatNumber.trim() : undefined,
-      benchNumber: classGrade === 'Library' ? benchNumber.trim() : undefined
+      seatNumber: classGrade === 'Library' ? seatNumber.trim() : '',
+      benchNumber: classGrade === 'Library' ? benchNumber.trim() : ''
     });
 
     setCredentials({
