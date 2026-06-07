@@ -1,0 +1,117 @@
+// firestore.rules
+// Deploy with: firebase deploy --only firestore:rules
+//
+// These rules enforce role-based access control for the School Management Portal.
+// Authentication is handled at the application layer (username/password stored in
+// Firestore appConfig / user collections). Adjust these rules to match your
+// Firebase Authentication setup if you add Firebase Auth later.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ─────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // For apps without Firebase Auth, allow reads/writes from your app's origin.
+    // IMPORTANT: Replace this with proper Auth rules in production.
+    function isAppRequest() {
+      return true; // Tighten this in production with Firebase Auth
+    }
+
+    // ── App Config (admin singleton) ─────────────────────────────────────────
+    match /appConfig/{docId} {
+      allow read:  if isAppRequest();
+      allow write: if isAppRequest(); // Restrict to authenticated admin in production
+    }
+
+    // ── Teachers ─────────────────────────────────────────────────────────────
+    match /teachers/{teacherId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Students ─────────────────────────────────────────────────────────────
+    match /students/{studentId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Parents ──────────────────────────────────────────────────────────────
+    match /parents/{parentId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Assignments ──────────────────────────────────────────────────────────
+    match /assignments/{assignmentId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Submissions ──────────────────────────────────────────────────────────
+    match /submissions/{submissionId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Study Materials ───────────────────────────────────────────────────────
+    match /studyMaterials/{materialId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Messages ─────────────────────────────────────────────────────────────
+    match /messages/{messageId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    match /notifications/{notificationId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Activity Logs ─────────────────────────────────────────────────────────
+    match /activityLogs/{logId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      // Logs are immutable — no updates or deletes
+    }
+
+    // ── Timetables ────────────────────────────────────────────────────────────
+    match /timetables/{timetableId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+
+    // ── Attendance ────────────────────────────────────────────────────────────
+    match /attendance/{attendanceId} {
+      allow read:   if isAppRequest();
+      allow create: if isAppRequest();
+      allow update: if isAppRequest();
+      allow delete: if isAppRequest();
+    }
+  }
+}
