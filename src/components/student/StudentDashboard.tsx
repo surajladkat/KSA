@@ -92,9 +92,9 @@ export default function StudentDashboard() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-1">
-      
+
       {/* Student Profile Overview */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -107,7 +107,7 @@ export default function StudentDashboard() {
           <p className="text-[10px] font-bold text-indigo-650 text-indigo-600 tracking-wider uppercase font-mono">Class Student</p>
           <p className="text-base font-extrabold text-slate-900 mt-0.5">{student?.name}</p>
           <p className="text-xs text-slate-400 mt-0.5 font-mono">ID: {student?.studentIdCardNum}</p>
-          
+
           <div className="mt-3 flex flex-wrap gap-1.5">
             <span className="inline-block px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50/50 border border-blue-100 text-blue-700 rounded-lg text-xs font-bold font-mono">
               Grade {student?.classGrade} Folder Access
@@ -131,85 +131,79 @@ export default function StudentDashboard() {
 
         {/* Dashboard Menu Buttons */}
         <div className="space-y-1 pt-1">
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('assignments-desk')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'assignments-desk' 
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'assignments-desk'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <Calendar className="w-4 h-4 text-emerald-600" />
             My Assignment Desk
           </motion.button>
 
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('study-folder')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'study-folder' 
-                ? 'bg-indigo-50 text-indigo-805 text-indigo-800 border border-indigo-205 border-indigo-200 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'study-folder'
+                ? 'bg-indigo-50 text-indigo-805 text-indigo-800 border border-indigo-205 border-indigo-200 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <BookOpen className="w-4 h-4 text-indigo-600" />
             Class {student?.classGrade} Reference Library
           </motion.button>
 
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('grades')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'grades' 
-                ? 'bg-amber-50 text-amber-805 text-amber-805 text-amber-800 border border-amber-205 border-amber-200 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'grades'
+                ? 'bg-amber-50 text-amber-805 text-amber-805 text-amber-800 border border-amber-205 border-amber-200 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <Award className="w-4 h-4 text-amber-600" />
             Reports & Grades
           </motion.button>
 
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('timetable')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'timetable' 
-                ? 'bg-sky-50 text-sky-805 text-sky-850 text-sky-800 border border-sky-105 border-sky-100 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'timetable'
+                ? 'bg-sky-50 text-sky-805 text-sky-850 text-sky-800 border border-sky-105 border-sky-100 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <Calendar className="w-4 h-4 text-sky-600" />
             My Class Timetable
           </motion.button>
 
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('attendance')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'attendance' 
-                ? 'bg-rose-50 text-rose-805 text-rose-800 border border-rose-205 border-rose-200 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'attendance'
+                ? 'bg-rose-50 text-rose-805 text-rose-800 border border-rose-205 border-rose-200 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <CheckCircle2 className="w-4 h-4 text-rose-600" />
             Attendance Register
           </motion.button>
 
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.01, x: 2 }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setActiveTab('faculty-directory')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-              activeTab === 'faculty-directory' 
-                ? 'bg-slate-100 text-slate-805 text-slate-800 border border-slate-200 shadow-3xs' 
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${activeTab === 'faculty-directory'
+                ? 'bg-slate-100 text-slate-805 text-slate-800 border border-slate-200 shadow-3xs'
                 : 'text-slate-650 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             <Users className="w-4 h-4 text-slate-600" />
             Faculty Directory
@@ -242,14 +236,13 @@ export default function StudentDashboard() {
                 ₹{student.pendingFee ?? 15000}
               </span>
             </div>
-            
+
             {/* Status Badge */}
             <div className="pt-1.5 text-center">
-              <span className={`inline-block w-full py-1 rounded text-[10px] font-bold font-mono ${
-                student.paymentStatus === 'PAID' ? 'bg-emerald-100 text-emerald-800' :
-                student.paymentStatus === 'PARTIAL' ? 'bg-amber-100 text-amber-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+              <span className={`inline-block w-full py-1 rounded text-[10px] font-bold font-mono ${student.paymentStatus === 'PAID' ? 'bg-emerald-100 text-emerald-800' :
+                  student.paymentStatus === 'PARTIAL' ? 'bg-amber-100 text-amber-800' :
+                    'bg-red-100 text-red-800'
+                }`}>
                 {student.paymentStatus ?? 'PENDING'}
               </span>
             </div>
@@ -258,7 +251,7 @@ export default function StudentDashboard() {
       </motion.div>
 
       {/* Main Panel */}
-      <motion.div 
+      <motion.div
         key={activeTab}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -297,10 +290,10 @@ export default function StudentDashboard() {
         {/* Dynamic tabs display */}
         {activeTab === 'assignments-desk' && (
           <div className="space-y-6">
-            
+
             {/* Split screen: Tasks Queue & Editor */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              
+
               {/* Task Queue list */}
               <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm xl:col-span-2 space-y-4">
                 <div>
@@ -328,11 +321,10 @@ export default function StudentDashboard() {
                             </div>
 
                             {submission ? (
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 font-mono ${
-                                submission.status === 'GRADED' 
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 font-mono ${submission.status === 'GRADED'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                                   : 'bg-blue-50 text-blue-700 border border-blue-100'
-                              }`}>
+                                }`}>
                                 <CheckCircle2 className="w-3.5 h-3.5" />
                                 {submission.status === 'GRADED' ? `Grade: ${submission.grade}` : 'Submitted (Secure)'}
                               </span>
@@ -419,13 +411,12 @@ export default function StudentDashboard() {
                           }
                         }}
                         onClick={() => document.getElementById('student-hw-file-input')?.click()}
-                        className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors ${
-                          subDragActive 
-                            ? 'border-blue-550 bg-blue-50 text-blue-800' 
-                            : subFileName 
-                            ? 'border-emerald-300 bg-emerald-50/20' 
-                            : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/50'
-                        }`}
+                        className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors ${subDragActive
+                            ? 'border-blue-550 bg-blue-50 text-blue-800'
+                            : subFileName
+                              ? 'border-emerald-300 bg-emerald-50/20'
+                              : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/50'
+                          }`}
                       >
                         <input
                           type="file"
@@ -608,56 +599,54 @@ export default function StudentDashboard() {
             {/* List of graded submissions */}
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-slate-705 text-slate-700 uppercase tracking-wide font-mono">Tasks Evaluation Log</h3>
-              
-              <div className="border border-slate-200 rounded-xl overflow-hidden font-sans">
-                <table className="w-full text-xs text-left text-slate-500">
-                  <thead className="bg-slate-55 bg-slate-50 border-b border-slate-205 border-slate-200 text-[10px] text-slate-400 font-extrabold uppercase font-mono">
+
+              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto font-sans">                <table className="w-full text-xs text-left text-slate-500">
+                <thead className="bg-slate-55 bg-slate-50 border-b border-slate-205 border-slate-200 text-[10px] text-slate-400 font-extrabold uppercase font-mono">
+                  <tr>
+                    <th className="py-3 px-4">Subject</th>
+                    <th className="py-3 px-4">Assignment Description</th>
+                    <th className="py-3 px-4">Submitted Date</th>
+                    <th className="py-3 px-4">Automatic Grade Status</th>
+                    <th className="py-3 px-4">Teacher Comments/Feedback</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-600">
+                  {submissions.filter(s => s.studentId === student?.id).length === 0 ? (
                     <tr>
-                      <th className="py-3 px-4">Subject</th>
-                      <th className="py-3 px-4">Assignment Description</th>
-                      <th className="py-3 px-4">Submitted Date</th>
-                      <th className="py-3 px-4">Automatic Grade Status</th>
-                      <th className="py-3 px-4">Teacher Comments/Feedback</th>
+                      <td colSpan={5} className="py-6 text-center text-xs italic text-slate-450">
+                        No submissions recorded in system database for your profile.
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-600">
-                    {submissions.filter(s => s.studentId === student?.id).length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-6 text-center text-xs italic text-slate-450">
-                          No submissions recorded in system database for your profile.
-                        </td>
-                      </tr>
-                    ) : (
-                      submissions
-                        .filter(s => s.studentId === student?.id)
-                        .map(sub => (
-                          <tr key={sub.id} className="hover:bg-slate-50/50">
-                            <td className="py-3.5 px-4 font-bold text-slate-800">
-                              {assignments.find(a => a.id === sub.assignmentId)?.subject || 'Academics'}
-                            </td>
-                            <td className="py-3.5 px-4 leading-normal">
-                              <p className="font-semibold text-slate-800">{sub.assignmentTitle}</p>
-                            </td>
-                            <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
-                              {new Date(sub.submittedAt).toLocaleDateString()}
-                            </td>
-                            <td className="py-3.5 px-4 font-mono">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                sub.status === 'GRADED' 
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-                                  : 'bg-blue-50 text-blue-700 border border-blue-100'
+                  ) : (
+                    submissions
+                      .filter(s => s.studentId === student?.id)
+                      .map(sub => (
+                        <tr key={sub.id} className="hover:bg-slate-50/50">
+                          <td className="py-3.5 px-4 font-bold text-slate-800">
+                            {assignments.find(a => a.id === sub.assignmentId)?.subject || 'Academics'}
+                          </td>
+                          <td className="py-3.5 px-4 leading-normal">
+                            <p className="font-semibold text-slate-800">{sub.assignmentTitle}</p>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                            {new Date(sub.submittedAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${sub.status === 'GRADED'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                : 'bg-blue-50 text-blue-700 border border-blue-100'
                               }`}>
-                                {sub.status === 'GRADED' ? `Grade: ${sub.grade}` : 'Pending review'}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 max-w-xs truncate italic text-slate-500">
-                              {sub.feedback || 'No remarks published yet.'}
-                            </td>
-                          </tr>
-                        ))
-                    )}
-                  </tbody>
-                </table>
+                              {sub.status === 'GRADED' ? `Grade: ${sub.grade}` : 'Pending review'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 max-w-xs truncate italic text-slate-500">
+                            {sub.feedback || 'No remarks published yet.'}
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
               </div>
             </div>
 
@@ -719,8 +708,8 @@ export default function StudentDashboard() {
 
           // Attendance rate calculation (treating PRESENT and LATE as present, EXCUSED as exempt or neutral)
           const netTurnoutCount = presentCount + lateCount + excusedCount;
-          const turnoutPercentage = totalRecords > 0 
-            ? Math.round((netTurnoutCount / totalRecords) * 100) 
+          const turnoutPercentage = totalRecords > 0
+            ? Math.round((netTurnoutCount / totalRecords) * 100)
             : 100;
 
           return (
@@ -740,9 +729,8 @@ export default function StudentDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 font-sans">
                   <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-center items-center text-center">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Turnout Rate</span>
-                    <strong className={`text-2xl font-black mt-1 ${
-                      turnoutPercentage >= 85 ? 'text-emerald-600' : turnoutPercentage >= 75 ? 'text-amber-500' : 'text-rose-600'
-                    }`}>
+                    <strong className={`text-2xl font-black mt-1 ${turnoutPercentage >= 85 ? 'text-emerald-600' : turnoutPercentage >= 75 ? 'text-amber-500' : 'text-rose-600'
+                      }`}>
                       {totalRecords > 0 ? `${turnoutPercentage}%` : 'N/A'}
                     </strong>
                     <span className="text-[9px] text-slate-400 mt-0.5 font-mono">Minimum Required: 75%</span>
@@ -809,15 +797,14 @@ export default function StudentDashboard() {
                             )}
                           </div>
 
-                          <span className={`px-3 py-1 rounded-full font-black text-[10px] tracking-wide font-mono text-center sm:text-right w-fit ${
-                            rec.status === 'PRESENT'
+                          <span className={`px-3 py-1 rounded-full font-black text-[10px] tracking-wide font-mono text-center sm:text-right w-fit ${rec.status === 'PRESENT'
                               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                               : rec.status === 'ABSENT'
-                              ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                              : rec.status === 'LATE'
-                              ? 'bg-amber-100 text-amber-805 text-amber-800 border border-amber-300'
-                              : 'bg-slate-100 text-slate-700 border border-slate-300'
-                          }`}>
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : rec.status === 'LATE'
+                                  ? 'bg-amber-100 text-amber-805 text-amber-800 border border-amber-300'
+                                  : 'bg-slate-100 text-slate-700 border border-slate-300'
+                            }`}>
                             {rec.status}
                           </span>
                         </div>

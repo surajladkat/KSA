@@ -7,19 +7,19 @@ import React, { useState, useEffect } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { ClassGrade } from '../../types';
 import { motion } from 'motion/react';
-import { 
-  Shield, 
-  UserPlus, 
-  BarChart2, 
-  Activity, 
-  CheckCircle2, 
-  Copy, 
-  Key, 
-  DollarSign, 
-  CreditCard, 
-  Briefcase, 
-  GraduationCap, 
-  Users, 
+import {
+  Shield,
+  UserPlus,
+  BarChart2,
+  Activity,
+  CheckCircle2,
+  Copy,
+  Key,
+  DollarSign,
+  CreditCard,
+  Briefcase,
+  GraduationCap,
+  Users,
   Search,
   BookOpen,
   Calendar,
@@ -37,10 +37,10 @@ const FEE_MAP: Record<ClassGrade, number> = {
 };
 
 export default function AdminDashboard() {
-  const { 
-    students, 
-    teachers, 
-    parents, 
+  const {
+    students,
+    teachers,
+    parents,
     activityLogs,
     timetables,
     registerStudentWithParent,
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
 
   // Active Main Tab
   const [activeTab, setActiveTab] = useState<'analytics' | 'onboarding' | 'fees' | 'logs' | 'timetable'>('analytics');
-  
+
   // Modals for Registry lists
   const [showStudentListModal, setShowStudentListModal] = useState(false);
   const [showTeacherListModal, setShowTeacherListModal] = useState(false);
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
   const [ttTimeSlot, setTtTimeSlot] = useState<string>('09:00 AM - 10:00 AM');
   const [ttSubject, setTtSubject] = useState<string>('');
   const [ttTeacher, setTtTeacher] = useState<string>('');
-  
+
   // Onboarding Sub-Tab
   const [onboardRole, setOnboardRole] = useState<'student' | 'teacher'>('student');
 
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
   // Fee Ledger Filter States
   const [feeSearch, setFeeSearch] = useState('');
   const [feeGradeFilter, setFeeGradeFilter] = useState<'ALL' | ClassGrade>('ALL');
-  
+
   // Inline Pay State
   const [payingStudentId, setPayingStudentId] = useState<string | null>(null);
   const [payAmountInput, setPayAmountInput] = useState<string>('');
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-1 font-sans">
       {/* Sidebar Navigation */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -226,71 +226,66 @@ export default function AdminDashboard() {
           <p className="text-[11px] text-slate-400 mt-1 font-sans">Academy Management</p>
         </div>
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('analytics')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
-            activeTab === 'analytics' 
-              ? 'bg-indigo-50 text-indigo-850 border-l-2 border-indigo-600 pl-3.5' 
-              : 'text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'analytics'
+            ? 'bg-indigo-50 text-indigo-850 border-l-2 border-indigo-600 pl-3.5'
+            : 'text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+            }`}
         >
           <BarChart2 className="w-4 h-4 text-indigo-500" />
           Academy Analytics
         </motion.button>
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('onboarding')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
-            activeTab === 'onboarding' 
-              ? 'bg-emerald-50 text-emerald-850 border-l-2 border-emerald-600 pl-3.5' 
-              : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'onboarding'
+            ? 'bg-emerald-50 text-emerald-850 border-l-2 border-emerald-600 pl-3.5'
+            : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+            }`}
         >
           <UserPlus className="w-4 h-4 text-emerald-500" />
           Staff & Student Admissions
         </motion.button>
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('fees')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
-            activeTab === 'fees' 
-              ? 'bg-amber-50 text-amber-850 border-l-2 border-amber-600 pl-3.5' 
-              : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'fees'
+            ? 'bg-amber-50 text-amber-850 border-l-2 border-amber-600 pl-3.5'
+            : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+            }`}
         >
           <DollarSign className="w-4 h-4 text-amber-550" />
           Fee Ledger & Structure
         </motion.button>
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('logs')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
-            activeTab === 'logs' 
-              ? 'bg-rose-50 text-rose-850 border-l-2 border-rose-600 pl-3.5' 
-              : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'logs'
+            ? 'bg-rose-50 text-rose-850 border-l-2 border-rose-600 pl-3.5'
+            : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+            }`}
         >
           <Activity className="w-4 h-4 text-rose-500" />
           System Log ({activityLogs.length})
         </motion.button>
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('timetable')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
-            activeTab === 'timetable' 
-              ? 'bg-sky-50 text-sky-850 border-l-2 border-sky-600 pl-3.5' 
-              : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-          }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'timetable'
+            ? 'bg-sky-50 text-sky-850 border-l-2 border-sky-600 pl-3.5'
+            : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+            }`}
         >
           <Calendar className="w-4 h-4 text-sky-500" />
           Class Timetables
@@ -298,17 +293,17 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* Main Content Area */}
-      <motion.div 
+      <motion.div
         key={activeTab}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="lg:col-span-3 space-y-6 text-left"
       >
-        
+
         {/* Dynamic Totals Dashboard Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div 
+          <div
             onClick={() => setShowStudentListModal(true)}
             className="group relative bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-300 overflow-hidden"
           >
@@ -320,7 +315,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => setShowTeacherListModal(true)}
             className="group relative bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs cursor-pointer hover:border-emerald-400 hover:shadow-md transition-all duration-300 overflow-hidden"
           >
@@ -394,11 +389,11 @@ export default function AdminDashboard() {
                     <CreditCard className="w-4 h-4 text-emerald-600" /> Budget Collections
                   </p>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Total expected fee collections stand at <strong className="text-slate-800">₹{totalProjected}</strong>. 
+                    Total expected fee collections stand at <strong className="text-slate-800">₹{totalProjected}</strong>.
                     Currently, <strong>{Math.round((totalCollections / (totalProjected || 1)) * 100)}%</strong> of tuition invoices have been finalized and cleared by guardians.
                   </p>
                 </div>
-                
+
                 {/* SVG Visual Progress Bar */}
                 <div className="space-y-2 pt-4">
                   <div className="flex justify-between items-baseline text-xs">
@@ -406,14 +401,14 @@ export default function AdminDashboard() {
                     <span className="text-sm font-extrabold text-emerald-600">{Math.round((totalCollections / (totalProjected || 1)) * 100)}% Collected</span>
                   </div>
                   <div className="h-5 bg-slate-100 rounded-lg flex overflow-hidden border border-slate-200 font-mono text-[9px] text-white">
-                    <div 
-                      className="bg-emerald-500 h-full flex items-center justify-center font-bold" 
+                    <div
+                      className="bg-emerald-500 h-full flex items-center justify-center font-bold"
                       style={{ width: `${(totalCollections / (totalProjected || 1)) * 100}%` }}
                     >
                       {totalCollections > 0 && `₹${totalCollections}`}
                     </div>
-                    <div 
-                      className="bg-red-200 text-red-800 h-full flex items-center justify-center font-bold" 
+                    <div
+                      className="bg-red-200 text-red-800 h-full flex items-center justify-center font-bold"
                       style={{ width: `${(totalOutstanding / (totalProjected || 1)) * 105}%` }}
                     >
                       {totalOutstanding > 0 && `₹${totalOutstanding}`}
@@ -450,7 +445,7 @@ export default function AdminDashboard() {
         {/* 2. ONBOARDING & ENROLLMENT PORTAL */}
         {activeTab === 'onboarding' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
-            
+
             {/* Header and Pill Toggle for student vs teacher */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
@@ -487,7 +482,7 @@ export default function AdminDashboard() {
                   <h3 className="text-xs font-bold text-blue-900 flex items-center gap-1.5 font-mono">
                     <CheckCircle2 className="w-4 h-4 text-blue-600" /> Official Login ID Generated Successfully
                   </h3>
-                  <button 
+                  <button
                     onClick={() => setCredentials(null)}
                     className="text-[11px] text-blue-700 font-bold bg-white px-3 py-1 rounded-lg border border-blue-150 hover:bg-slate-50 cursor-pointer shadow-xs font-sans"
                   >
@@ -787,11 +782,10 @@ export default function AdminDashboard() {
                             type="button"
                             key={grade}
                             onClick={() => handleGradeToggle(grade)}
-                            className={`px-3 py-2 rounded-lg cursor-pointer border text-center transition ${
-                              isSelected 
-                                ? 'bg-blue-600 text-white font-bold border-blue-650' 
-                                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350 hover:bg-slate-50'
-                            }`}
+                            className={`px-3 py-2 rounded-lg cursor-pointer border text-center transition ${isSelected
+                              ? 'bg-blue-600 text-white font-bold border-blue-650'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350 hover:bg-slate-50'
+                              }`}
                           >
                             Class {grade}
                           </button>
@@ -816,7 +810,7 @@ export default function AdminDashboard() {
         {/* 3. FEE STRUCTURE & INLINE LEDGER */}
         {activeTab === 'fees' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
-            
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -885,8 +879,8 @@ export default function AdminDashboard() {
                 <tbody className="divide-y divide-slate-100 bg-white text-slate-755 text-slate-700">
                   {students
                     .filter(s => {
-                      const matchesSearch = s.name.toLowerCase().includes(feeSearch.toLowerCase()) || 
-                                            s.username.toLowerCase().includes(feeSearch.toLowerCase());
+                      const matchesSearch = s.name.toLowerCase().includes(feeSearch.toLowerCase()) ||
+                        s.username.toLowerCase().includes(feeSearch.toLowerCase());
                       const matchesGrade = feeGradeFilter === 'ALL' || s.classGrade === feeGradeFilter;
                       return matchesSearch && matchesGrade;
                     })
@@ -909,11 +903,10 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide ${
-                              s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide ${s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                               s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                              'bg-red-50 text-red-700 border border-red-100'
-                            }`}>
+                                'bg-red-50 text-red-700 border border-red-100'
+                              }`}>
                               {s.paymentStatus || 'PENDING'}
                             </span>
                           </td>
@@ -991,51 +984,50 @@ export default function AdminDashboard() {
             </div>
 
             {/* Table layout */}
-<div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">              <table className="w-full text-xs text-left text-slate-500 border-collapse">
-                <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
-                  <tr>
-                    <th className="py-3 px-4">Time</th>
-                    <th className="py-3 px-4">Operator</th>
-                    <th className="py-3 px-4">Level</th>
-                    <th className="py-3 px-4">Operation Verified</th>
-                    <th className="py-3 px-4 text-right font-mono">IP Check</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {activityLogs
-                    .filter(log => 
-                      log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
-                      log.userName.toLowerCase().includes(logSearch.toLowerCase())
-                    )
-                    .slice(0, 15)
-                    .map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
-                        <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
-                          {new Date(log.timestamp).toLocaleTimeString()}
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
-                          {log.userName}
-                        </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${
-                            log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
-                            log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
+            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">              <table className="w-full text-xs text-left text-slate-500 border-collapse">
+              <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
+                <tr>
+                  <th className="py-3 px-4">Time</th>
+                  <th className="py-3 px-4">Operator</th>
+                  <th className="py-3 px-4">Level</th>
+                  <th className="py-3 px-4">Operation Verified</th>
+                  <th className="py-3 px-4 text-right font-mono">IP Check</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {activityLogs
+                  .filter(log =>
+                    log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
+                    log.userName.toLowerCase().includes(logSearch.toLowerCase())
+                  )
+                  .slice(0, 15)
+                  .map((log) => (
+                    <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
+                      <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
+                        {log.userName}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
+                          log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
                             log.userRole === 'STUDENT' ? 'bg-slate-50 text-slate-600' :
-                            'bg-amber-50 text-amber-700'
+                              'bg-amber-50 text-amber-700'
                           }`}>
-                            {log.userRole}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-600 font-medium">
-                          {log.action}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
-                          {log.ipAddress}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+                          {log.userRole}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 font-medium">
+                        {log.action}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
+                        {log.ipAddress}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
             </div>
           </div>
         )}
@@ -1055,8 +1047,8 @@ export default function AdminDashboard() {
               {/* Creator Form */}
               <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 space-y-4">
                 <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest font-mono">Create Schedule Slot</h3>
-                
-                <form 
+
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!ttSubject.trim() || !ttTeacher) {
@@ -1220,7 +1212,7 @@ export default function AdminDashboard() {
       {/* OVERLAY MODALS FOR REGISTRY DIRECTORIES */}
       {showStudentListModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-6xl w-full max-h-[85vh] overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h2 className="text-base font-black text-slate-950 flex items-center gap-2">
@@ -1228,7 +1220,7 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">Comprehensive real-time student log containing student credentials and outstanding fee metrics.</p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowStudentListModal(false)}
                 className="p-1 px-2.5 rounded bg-slate-100 hover:bg-slate-250 text-slate-650 hover:bg-slate-200 text-xs transition cursor-pointer font-bold"
               >
@@ -1239,8 +1231,8 @@ export default function AdminDashboard() {
             <div className="p-5 border-b border-slate-100 bg-white">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Search students by name, card number or Class grade..."
                   value={studentSearchText}
                   onChange={e => setStudentSearchText(e.target.value)}
@@ -1257,7 +1249,8 @@ export default function AdminDashboard() {
                       <th className="py-2.5 px-3">Student Details</th>
                       <th className="py-2.5 px-3">Parent Details</th>
                       <th className="py-2.5 px-3">Class Grade</th>
-                      <th className="py-2.5 px-3">Login Credentials Info</th>
+                      <th className="py-2.5 px-3">Student Login Info</th>
+                      <th className="py-2.5 px-3">Parent Login Info</th>
                       <th className="py-2.5 px-3">Total Fee</th>
                       <th className="py-2.5 px-3">Paid Fee</th>
                       <th className="py-2.5 px-3">Pending Fee</th>
@@ -1267,7 +1260,7 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {students
-                      .filter(s => 
+                      .filter(s =>
                         s.name.toLowerCase().includes(studentSearchText.toLowerCase()) ||
                         s.classGrade.toLowerCase().includes(studentSearchText.toLowerCase()) ||
                         s.studentIdCardNum.toLowerCase().includes(studentSearchText.toLowerCase()) ||
@@ -1302,19 +1295,29 @@ export default function AdminDashboard() {
                             </td>
                             <td className="py-2.5 px-3 whitespace-nowrap bg-blue-50/30">
                               <div className="flex flex-col text-[10px] space-y-0.5">
-                                <span className="font-semibold text-slate-700">Login ID: <span className="font-bold text-blue-750 font-sans text-blue-700">{s.username}</span></span>
-                                <span className="text-slate-500 font-mono">Password: <span className="font-bold text-slate-700">{s.username}123</span></span>
+                                <span className="font-semibold text-slate-700">ID: <span className="font-bold text-blue-750 font-sans text-blue-700">{s.username}</span></span>
+                                <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{s.username}123</span></span>
                               </div>
                             </td>
+                            <td className="py-2.5 px-3 whitespace-nowrap bg-amber-50/30 border-l border-slate-100">
+                              {linkedParent ? (
+                                <div className="flex flex-col text-[10px] space-y-0.5">
+                                  <span className="font-semibold text-slate-700">ID: <span className="font-bold text-amber-700 font-sans">{linkedParent.username}</span></span>
+                                  <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{linkedParent.username}123</span></span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 italic text-[10px]">No linked parent</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
                             <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
                             <td className="py-2.5 px-3 font-mono text-emerald-600 font-bold">₹{s.paidFee}</td>
                             <td className="py-2.5 px-3 font-mono text-red-650 text-red-600 font-bold">₹{s.pendingFee}</td>
                             <td className="py-2.5 px-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border ${
-                                s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border ${s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                                 s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                'bg-red-50 text-red-700 border-red-200'
-                              }`}>
+                                  'bg-red-50 text-red-700 border-red-200'
+                                }`}>
                                 {s.paymentStatus}
                               </span>
                             </td>
@@ -1369,7 +1372,7 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">Comprehensive real-time teacher roster containing access IDs and tutoring subject specializations.</p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowTeacherListModal(false)}
                 className="p-1 px-2.5 rounded bg-slate-100 hover:bg-slate-250 text-slate-650 hover:bg-slate-200 text-xs transition cursor-pointer font-bold"
               >
@@ -1380,8 +1383,8 @@ export default function AdminDashboard() {
             <div className="p-5 border-b border-slate-100 bg-white">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Search teachers by name or subject specialty..."
                   value={teacherSearchText}
                   onChange={e => setTeacherSearchText(e.target.value)}
@@ -1391,85 +1394,85 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-5 overflow-y-auto flex-1 bg-white">
-<div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">                <table className="w-full text-xs text-left text-slate-500 border-collapse">
-                  <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
-                    <tr>
-                      <th className="py-2.5 px-3">Faculty Name</th>
-                      <th className="py-2.5 px-3">Subjects Taught</th>
-                      <th className="py-2.5 px-3">Assigned Classes</th>
-                      <th className="py-2.5 px-3">Login Credentials Info</th>
-                      <th className="py-2.5 px-3 text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {teachers
-                      .filter(t => 
-                        t.name.toLowerCase().includes(teacherSearchText.toLowerCase()) ||
-                        t.subjects.some(subj => subj.toLowerCase().includes(teacherSearchText.toLowerCase()))
-                      )
-                      .map(t => (
-                        <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
-                            {t.name}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <div className="flex flex-wrap gap-1">
-                              {t.subjects.map(sub => (
-                                <span key={sub} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[9px] font-bold uppercase tracking-wider font-mono">
-                                  {sub}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <div className="flex flex-wrap gap-1">
-                              {t.classes.map(cl => (
-                                <span key={cl} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[9px] font-mono">
-                                  Class {cl}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3 whitespace-nowrap bg-emerald-50/30">
-                            <div className="flex flex-col text-[10px] space-y-0.5">
-                              <span className="font-semibold text-slate-700">Login ID: <span className="font-bold text-emerald-800 font-sans">{t.username}</span></span>
-                              <span className="text-slate-500 font-mono">Password: <span className="font-bold text-slate-700">{t.username}123</span></span>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                            {confirmDeleteTeacherId === t.id ? (
-                              <div className="flex items-center gap-1.5 justify-center">
-                                <button
-                                  onClick={() => {
-                                    deleteTeacher(t.id);
-                                    setConfirmDeleteTeacherId(null);
-                                  }}
-                                  className="px-2 py-1 bg-red-650 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
-                                >
-                                  Yes
-                                </button>
-                                <button
-                                  onClick={() => setConfirmDeleteTeacherId(null)}
-                                  className="px-2 py-1 bg-slate-250 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
-                                >
-                                  No
-                                </button>
-                              </div>
-                            ) : (
+              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">                <table className="w-full text-xs text-left text-slate-500 border-collapse">
+                <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
+                  <tr>
+                    <th className="py-2.5 px-3">Faculty Name</th>
+                    <th className="py-2.5 px-3">Subjects Taught</th>
+                    <th className="py-2.5 px-3">Assigned Classes</th>
+                    <th className="py-2.5 px-3">Login Credentials Info</th>
+                    <th className="py-2.5 px-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {teachers
+                    .filter(t =>
+                      t.name.toLowerCase().includes(teacherSearchText.toLowerCase()) ||
+                      t.subjects.some(subj => subj.toLowerCase().includes(teacherSearchText.toLowerCase()))
+                    )
+                    .map(t => (
+                      <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
+                          {t.name}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {t.subjects.map(sub => (
+                              <span key={sub} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[9px] font-bold uppercase tracking-wider font-mono">
+                                {sub}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {t.classes.map(cl => (
+                              <span key={cl} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[9px] font-mono">
+                                Class {cl}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap bg-emerald-50/30">
+                          <div className="flex flex-col text-[10px] space-y-0.5">
+                            <span className="font-semibold text-slate-700">Login ID: <span className="font-bold text-emerald-800 font-sans">{t.username}</span></span>
+                            <span className="text-slate-500 font-mono">Password: <span className="font-bold text-slate-700">{t.username}123</span></span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                          {confirmDeleteTeacherId === t.id ? (
+                            <div className="flex items-center gap-1.5 justify-center">
                               <button
-                                onClick={() => setConfirmDeleteTeacherId(t.id)}
-                                className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
-                                title="Delete Faculty Member"
+                                onClick={() => {
+                                  deleteTeacher(t.id);
+                                  setConfirmDeleteTeacherId(null);
+                                }}
+                                className="px-2 py-1 bg-red-650 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                Yes
                               </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    }
-                  </tbody>
-                </table>
+                              <button
+                                onClick={() => setConfirmDeleteTeacherId(null)}
+                                className="px-2 py-1 bg-slate-250 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteTeacherId(t.id)}
+                              className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
+                              title="Delete Faculty Member"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
               </div>
             </div>
           </div>
