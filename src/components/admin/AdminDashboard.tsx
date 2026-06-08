@@ -869,7 +869,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Student Ledger List */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto shadow-2xs">
               <table className="w-full text-left border-collapse text-xs text-slate-500">
                 <thead className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-mono text-slate-400 font-bold">
                   <tr>
@@ -991,8 +991,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Table layout */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <table className="w-full text-xs text-left text-slate-500 border-collapse">
+<div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">              <table className="w-full text-xs text-left text-slate-500 border-collapse">
                 <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
                   <tr>
                     <th className="py-3 px-4">Time</th>
@@ -1251,7 +1250,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-5 overflow-y-auto flex-1 bg-white">
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
                 <table className="w-full text-xs text-left text-slate-500 border-collapse">
                   <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
                     <tr>
@@ -1392,8 +1391,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-5 overflow-y-auto flex-1 bg-white">
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-xs text-left text-slate-500 border-collapse">
+<div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">                <table className="w-full text-xs text-left text-slate-500 border-collapse">
                   <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
                     <tr>
                       <th className="py-2.5 px-3">Faculty Name</th>
