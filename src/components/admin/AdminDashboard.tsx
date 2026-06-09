@@ -7,19 +7,19 @@ import React, { useState, useEffect } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { ClassGrade } from '../../types';
 import { motion } from 'motion/react';
-import {
-  Shield,
-  UserPlus,
-  BarChart2,
-  Activity,
-  CheckCircle2,
-  Copy,
-  Key,
-  DollarSign,
-  CreditCard,
-  Briefcase,
-  GraduationCap,
-  Users,
+import { 
+  Shield, 
+  UserPlus, 
+  BarChart2, 
+  Activity, 
+  CheckCircle2, 
+  Copy, 
+  Key, 
+  DollarSign, 
+  CreditCard, 
+  Briefcase, 
+  GraduationCap, 
+  Users, 
   Search,
   BookOpen,
   Calendar,
@@ -28,19 +28,41 @@ import {
   X
 } from 'lucide-react';
 
-const FEE_MAP: Record<ClassGrade, number> = {
-  '9th': 15000,
-  '10th': 18000,
-  '11th': 22000,
-  '12th': 25000,
+// ✅ UPDATED REQUIREMENT: Separated Board and CET options for 11th & 12th
+const CLASS_OPTIONS = [
+  '9th Semi Eng (Maths, Science, English)',
+  '9th CBSE',
+  '10th Semi Eng (Maths, Science, English)',
+  '10th CBSE',
+  '11th Board',
+  '11th CET',
+  '11th Board + CET',
+  '12th Board',
+  '12th CET',
+  '12th Board + CET',
+  'Library'
+];
+
+// ✅ UPDATED REQUIREMENT: Exact Fee Structure Mapped (Split Fees)
+const FEE_MAP: Record<string, number> = {
+  '9th Semi Eng (Maths, Science, English)': 9000,
+  '9th CBSE': 12000,
+  '10th Semi Eng (Maths, Science, English)': 12000,
+  '10th CBSE': 17000,
+  '11th Board': 15000,
+  '11th CET': 10000,
+  '11th Board + CET': 25000, // 15000 + 10000
+  '12th Board': 20000,
+  '12th CET': 15000,
+  '12th Board + CET': 35000, // 20000 + 15000
   'Library': 5000
 };
 
 export default function AdminDashboard() {
-  const {
-    students,
-    teachers,
-    parents,
+  const { 
+    students, 
+    teachers, 
+    parents, 
     activityLogs,
     timetables,
     registerStudentWithParent,
@@ -54,7 +76,7 @@ export default function AdminDashboard() {
 
   // Active Main Tab
   const [activeTab, setActiveTab] = useState<'analytics' | 'onboarding' | 'fees' | 'logs' | 'timetable'>('analytics');
-
+  
   // Modals for Registry lists
   const [showStudentListModal, setShowStudentListModal] = useState(false);
   const [showTeacherListModal, setShowTeacherListModal] = useState(false);
@@ -66,35 +88,46 @@ export default function AdminDashboard() {
   const [confirmDeleteTeacherId, setConfirmDeleteTeacherId] = useState<string | null>(null);
 
   // Timetable Form States
-  const [ttClassGrade, setTtClassGrade] = useState<ClassGrade>('9th');
+  const [ttClassGrade, setTtClassGrade] = useState<string>(CLASS_OPTIONS[0]);
   const [ttDay, setTtDay] = useState<string>('Monday');
   const [ttTimeSlot, setTtTimeSlot] = useState<string>('09:00 AM - 10:00 AM');
   const [ttSubject, setTtSubject] = useState<string>('');
   const [ttTeacher, setTtTeacher] = useState<string>('');
-
+  
   // Onboarding Sub-Tab
   const [onboardRole, setOnboardRole] = useState<'student' | 'teacher'>('student');
 
   // Student Onboarding States
   const [studentName, setStudentName] = useState('');
-  const [classGrade, setClassGrade] = useState<ClassGrade>('9th');
+  const [classGrade, setClassGrade] = useState<string>(CLASS_OPTIONS[0]);
   const [parentName, setParentName] = useState('');
   const [parentPhone, setParentPhone] = useState('');
   const [relationship, setRelationship] = useState('Father');
-  const [customTotalFee, setCustomTotalFee] = useState<number>(15000);
+  const [customTotalFee, setCustomTotalFee] = useState<number>(FEE_MAP[CLASS_OPTIONS[0]]);
   const [initialPaid, setInitialPaid] = useState<number>(0);
   const [seatNumber, setSeatNumber] = useState('');
   const [benchNumber, setBenchNumber] = useState('');
+  
+  // 10% Discount Toggle State
+  const [isOneTimePayment, setIsOneTimePayment] = useState<boolean>(false);
 
-  // Sync default fee when grade changes
+  // Sync default fee and apply 10% discount if one-time payment is selected
   useEffect(() => {
-    setCustomTotalFee(FEE_MAP[classGrade]);
-  }, [classGrade]);
+    const baseFee = FEE_MAP[classGrade] || 0;
+    if (isOneTimePayment) {
+      const discountedFee = baseFee - (baseFee * 0.10); // 10% Off
+      setCustomTotalFee(discountedFee);
+      setInitialPaid(discountedFee); // Auto-fill paid amount for one-time full payment
+    } else {
+      setCustomTotalFee(baseFee);
+      if (initialPaid >= baseFee) setInitialPaid(0); // reset if it was maxed out previously
+    }
+  }, [classGrade, isOneTimePayment]);
 
   // Teacher Onboarding States
   const [teacherNameInput, setTeacherNameInput] = useState('');
   const [teacherSubject, setTeacherSubject] = useState('');
-  const [teacherGrades, setTeacherGrades] = useState<ClassGrade[]>(['9th']);
+  const [teacherGrades, setTeacherGrades] = useState<string[]>([CLASS_OPTIONS[0]]);
 
   // Shared Credential Modal State
   const [credentials, setCredentials] = useState<{
@@ -113,8 +146,8 @@ export default function AdminDashboard() {
 
   // Fee Ledger Filter States
   const [feeSearch, setFeeSearch] = useState('');
-  const [feeGradeFilter, setFeeGradeFilter] = useState<'ALL' | ClassGrade>('ALL');
-
+  const [feeGradeFilter, setFeeGradeFilter] = useState<string>('ALL');
+  
   // Inline Pay State
   const [payingStudentId, setPayingStudentId] = useState<string | null>(null);
   const [payAmountInput, setPayAmountInput] = useState<string>('');
@@ -122,13 +155,20 @@ export default function AdminDashboard() {
   // Logging states
   const [logSearch, setLogSearch] = useState('');
 
-  const handleStudentSubmit = (e: React.FormEvent) => {
+  const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName.trim() || !parentName.trim() || !parentPhone.trim()) return;
 
-    const result = registerStudentWithParent({
+    // Mobile Number Restriction
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(parentPhone.trim())) {
+      alert("Please enter a valid 10-digit mobile number (e.g., 9876543210). It must start with 6, 7, 8, or 9.");
+      return;
+    }
+
+    const result = await registerStudentWithParent({
       studentName: studentName.trim(),
-      classGrade,
+      classGrade: classGrade as ClassGrade,
       parentName: parentName.trim(),
       parentRelation: relationship,
       parentPhone: parentPhone.trim(),
@@ -152,19 +192,20 @@ export default function AdminDashboard() {
     setStudentName('');
     setParentName('');
     setParentPhone('');
+    setIsOneTimePayment(false);
     setInitialPaid(0);
     setSeatNumber('');
     setBenchNumber('');
   };
 
-  const handleTeacherSubmit = (e: React.FormEvent) => {
+  const handleTeacherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!teacherNameInput.trim() || !teacherSubject.trim()) return;
 
-    const result = registerTeacher({
+    const result = await registerTeacher({
       name: teacherNameInput.trim(),
       subjects: [teacherSubject.trim()],
-      classes: teacherGrades
+      classes: teacherGrades as ClassGrade[]
     });
 
     setCredentials({
@@ -178,10 +219,10 @@ export default function AdminDashboard() {
     // Reset fields
     setTeacherNameInput('');
     setTeacherSubject('');
-    setTeacherGrades(['9th']);
+    setTeacherGrades([CLASS_OPTIONS[0]]);
   };
 
-  const handleGradeToggle = (grade: ClassGrade) => {
+  const handleGradeToggle = (grade: string) => {
     if (teacherGrades.includes(grade)) {
       if (teacherGrades.length > 1) {
         setTeacherGrades(prev => prev.filter(g => g !== grade));
@@ -212,7 +253,7 @@ export default function AdminDashboard() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-1 font-sans">
       {/* Sidebar Navigation */}
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -226,66 +267,71 @@ export default function AdminDashboard() {
           <p className="text-[11px] text-slate-400 mt-1 font-sans">Academy Management</p>
         </div>
 
-        <motion.button
+        <motion.button 
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('analytics')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'analytics'
-            ? 'bg-indigo-50 text-indigo-850 border-l-2 border-indigo-600 pl-3.5'
-            : 'text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-            }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
+            activeTab === 'analytics' 
+              ? 'bg-indigo-50 text-indigo-850 border-l-2 border-indigo-600 pl-3.5' 
+              : 'text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+          }`}
         >
           <BarChart2 className="w-4 h-4 text-indigo-500" />
           Academy Analytics
         </motion.button>
 
-        <motion.button
+        <motion.button 
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('onboarding')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'onboarding'
-            ? 'bg-emerald-50 text-emerald-850 border-l-2 border-emerald-600 pl-3.5'
-            : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-            }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
+            activeTab === 'onboarding' 
+              ? 'bg-emerald-50 text-emerald-850 border-l-2 border-emerald-600 pl-3.5' 
+              : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+          }`}
         >
           <UserPlus className="w-4 h-4 text-emerald-500" />
           Staff & Student Admissions
         </motion.button>
 
-        <motion.button
+        <motion.button 
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('fees')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'fees'
-            ? 'bg-amber-50 text-amber-850 border-l-2 border-amber-600 pl-3.5'
-            : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-            }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
+            activeTab === 'fees' 
+              ? 'bg-amber-50 text-amber-850 border-l-2 border-amber-600 pl-3.5' 
+              : 'text-slate-650 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+          }`}
         >
           <DollarSign className="w-4 h-4 text-amber-550" />
           Fee Ledger & Structure
         </motion.button>
 
-        <motion.button
+        <motion.button 
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('logs')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'logs'
-            ? 'bg-rose-50 text-rose-850 border-l-2 border-rose-600 pl-3.5'
-            : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-            }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
+            activeTab === 'logs' 
+              ? 'bg-rose-50 text-rose-850 border-l-2 border-rose-600 pl-3.5' 
+              : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+          }`}
         >
           <Activity className="w-4 h-4 text-rose-500" />
           System Log ({activityLogs.length})
         </motion.button>
 
-        <motion.button
+        <motion.button 
           whileHover={{ scale: 1.01, x: 2 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setActiveTab('timetable')}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${activeTab === 'timetable'
-            ? 'bg-sky-50 text-sky-850 border-l-2 border-sky-600 pl-3.5'
-            : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
-            }`}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer ${
+            activeTab === 'timetable' 
+              ? 'bg-sky-50 text-sky-850 border-l-2 border-sky-600 pl-3.5' 
+              : 'text-slate-655 text-slate-600 hover:bg-slate-50 border-l-2 border-transparent'
+          }`}
         >
           <Calendar className="w-4 h-4 text-sky-500" />
           Class Timetables
@@ -293,17 +339,17 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* Main Content Area */}
-      <motion.div
+      <motion.div 
         key={activeTab}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="lg:col-span-3 space-y-6 text-left"
       >
-
+        
         {/* Dynamic Totals Dashboard Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div
+          <div 
             onClick={() => setShowStudentListModal(true)}
             className="group relative bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-300 overflow-hidden"
           >
@@ -315,7 +361,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div
+          <div 
             onClick={() => setShowTeacherListModal(true)}
             className="group relative bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs cursor-pointer hover:border-emerald-400 hover:shadow-md transition-all duration-300 overflow-hidden"
           >
@@ -364,13 +410,13 @@ export default function AdminDashboard() {
                   <GraduationCap className="w-4 h-4 text-blue-600" /> Student Distribution
                 </p>
                 <div className="space-y-3 pt-2">
-                  {(['9th', '10th', '11th', '12th', 'Library'] as ClassGrade[]).map(grade => {
+                  {CLASS_OPTIONS.map(grade => {
                     const count = students.filter(s => s.classGrade === grade).length;
                     const pct = students.length ? Math.round((count / students.length) * 100) : 0;
                     return (
                       <div key={grade} className="space-y-1">
                         <div className="flex justify-between text-xs">
-                          <span className="font-semibold text-slate-700">{grade === 'Library' ? 'Library Students' : `Class ${grade} Course`}</span>
+                          <span className="font-semibold text-slate-700">{grade}</span>
                           <span className="font-mono text-slate-500 font-bold">{count} Enrolled ({pct}%)</span>
                         </div>
                         <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -389,11 +435,11 @@ export default function AdminDashboard() {
                     <CreditCard className="w-4 h-4 text-emerald-600" /> Budget Collections
                   </p>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Total expected fee collections stand at <strong className="text-slate-800">₹{totalProjected}</strong>.
+                    Total expected fee collections stand at <strong className="text-slate-800">₹{totalProjected}</strong>. 
                     Currently, <strong>{Math.round((totalCollections / (totalProjected || 1)) * 100)}%</strong> of tuition invoices have been finalized and cleared by guardians.
                   </p>
                 </div>
-
+                
                 {/* SVG Visual Progress Bar */}
                 <div className="space-y-2 pt-4">
                   <div className="flex justify-between items-baseline text-xs">
@@ -401,14 +447,14 @@ export default function AdminDashboard() {
                     <span className="text-sm font-extrabold text-emerald-600">{Math.round((totalCollections / (totalProjected || 1)) * 100)}% Collected</span>
                   </div>
                   <div className="h-5 bg-slate-100 rounded-lg flex overflow-hidden border border-slate-200 font-mono text-[9px] text-white">
-                    <div
-                      className="bg-emerald-500 h-full flex items-center justify-center font-bold"
+                    <div 
+                      className="bg-emerald-500 h-full flex items-center justify-center font-bold" 
                       style={{ width: `${(totalCollections / (totalProjected || 1)) * 100}%` }}
                     >
                       {totalCollections > 0 && `₹${totalCollections}`}
                     </div>
-                    <div
-                      className="bg-red-200 text-red-800 h-full flex items-center justify-center font-bold"
+                    <div 
+                      className="bg-red-200 text-red-800 h-full flex items-center justify-center font-bold" 
                       style={{ width: `${(totalOutstanding / (totalProjected || 1)) * 105}%` }}
                     >
                       {totalOutstanding > 0 && `₹${totalOutstanding}`}
@@ -430,7 +476,9 @@ export default function AdminDashboard() {
                   <div key={t.id} className="border border-slate-205 p-3 rounded-xl bg-slate-50/50 flex items-center justify-between">
                     <div>
                       <p className="font-extrabold text-slate-800">{t.name}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Classes assigned: {t.classes.join(', ')}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[200px]" title={t.classes.join(', ')}>
+                        Classes: {t.classes.join(', ')}
+                      </p>
                     </div>
                     <span className="bg-blue-50 text-blue-700 text-[10px] font-mono font-extrabold px-2.5 py-1 rounded-lg border border-blue-100">
                       {t.subjects[0]}
@@ -445,7 +493,7 @@ export default function AdminDashboard() {
         {/* 2. ONBOARDING & ENROLLMENT PORTAL */}
         {activeTab === 'onboarding' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
-
+            
             {/* Header and Pill Toggle for student vs teacher */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
@@ -477,12 +525,12 @@ export default function AdminDashboard() {
 
             {/* Generated Credentials Output Panel */}
             {credentials && (
-              <div className="bg-blue-50/45 border border-blue-200 rounded-xl p-5 space-y-4 font-normal">
-                <div className="flex items-center justify-between">
+              <div className="bg-blue-50/45 border border-blue-200 rounded-xl p-5 space-y-4 font-normal overflow-x-auto">
+                <div className="flex items-center justify-between min-w-[600px]">
                   <h3 className="text-xs font-bold text-blue-900 flex items-center gap-1.5 font-mono">
                     <CheckCircle2 className="w-4 h-4 text-blue-600" /> Official Login ID Generated Successfully
                   </h3>
-                  <button
+                  <button 
                     onClick={() => setCredentials(null)}
                     className="text-[11px] text-blue-700 font-bold bg-white px-3 py-1 rounded-lg border border-blue-150 hover:bg-slate-50 cursor-pointer shadow-xs font-sans"
                   >
@@ -491,18 +539,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {credentials.type === 'student' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Student details card */}
+                  <div className="grid grid-cols-2 gap-4 min-w-[600px]">
                     <div className="bg-white p-4 rounded-lg border border-blue-100 space-y-3 text-xs">
                       <p className="font-extrabold text-slate-800 flex items-center gap-1.5">
                         <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-mono font-bold">STUDENT</span>
                         {credentials.studentName}
                       </p>
                       <div className="border-t border-slate-50 pt-2 space-y-1.5">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Assigned Folder</span>
-                          <span className="font-bold text-slate-700">{classGrade} Grade</span>
-                        </div>
                         <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
                           <span className="text-slate-500 font-semibold">Login ID (Username)</span>
                           <span className="font-mono bg-white px-2 py-0.5 rounded text-[11px] text-blue-900 border border-slate-200 font-bold flex items-center gap-2">
@@ -520,17 +563,12 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Parent details card */}
                     <div className="bg-white p-4 rounded-lg border border-blue-100 space-y-3 text-xs">
                       <p className="font-extrabold text-slate-800 flex items-center gap-1.5">
                         <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-[9px] font-mono font-bold">PARENT</span>
                         {credentials.parentName}
                       </p>
                       <div className="border-t border-slate-50 pt-2 space-y-1.5">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Relation</span>
-                          <span className="font-bold text-slate-700">{relationship}</span>
-                        </div>
                         <div className="flex justify-between items-center bg-slate-50 p-2 rounded">
                           <span className="text-slate-500 font-semibold">Login ID (Username)</span>
                           <span className="font-mono bg-white px-2 py-0.5 rounded text-[11px] text-amber-900 border border-slate-200 font-bold flex items-center gap-2">
@@ -549,23 +587,17 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ) : (
-                  // Teacher details card
-                  <div className="bg-white p-5 rounded-lg border border-blue-100 space-y-3.5 text-xs max-w-xl">
+                  <div className="bg-white p-5 rounded-lg border border-blue-100 space-y-3.5 text-xs min-w-[500px]">
                     <p className="font-extrabold text-slate-800 flex items-center gap-1.5">
                       <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-805 text-emerald-700 rounded text-[9px] font-mono font-bold">TEACHING FACULTY</span>
                       {credentials.teacherName}
                     </p>
                     <div className="border-t border-slate-50 pt-2.5 space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400 font-sans">Primary Subject</span>
-                        <span className="font-bold text-slate-700">{credentials.subject}</span>
-                      </div>
                       <div className="flex justify-between text-xs border-b border-slate-50 pb-2">
-                        <span className="text-slate-400 font-sans">Classes assigned folder</span>
-                        <span className="font-bold text-slate-700">{teacherGrades.join(', ')}</span>
+                        <span className="text-slate-400 font-sans">Classes & Subjects</span>
+                        <span className="font-bold text-slate-700">{teacherGrades.join(', ')} | {credentials.subject}</span>
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="grid grid-cols-2 gap-3 pt-1">
                         <div className="bg-slate-50 p-2.5 rounded">
                           <span className="text-[10px] text-slate-400 font-semibold uppercase block mb-1">Generated ID Username</span>
                           <div className="flex items-center justify-between">
@@ -585,7 +617,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 )}
-                <div className="text-[10px] italic text-slate-400 font-sans border-t border-blue-100 pt-2.5">
+                <div className="text-[10px] italic text-slate-400 font-sans border-t border-blue-100 pt-2.5 min-w-[500px]">
                   🛡️ Give these credentials to the staff or parent. They can log in immediately from the home screen using this specific ID.
                 </div>
               </div>
@@ -617,14 +649,12 @@ export default function AdminDashboard() {
                       <label className="text-slate-500 font-medium font-sans">Class Level</label>
                       <select
                         value={classGrade}
-                        onChange={e => setClassGrade(e.target.value as ClassGrade)}
+                        onChange={e => setClassGrade(e.target.value)}
                         className="w-full text-xs font-sans border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-blue-500"
                       >
-                        <option value="9th">Class 9th Grade</option>
-                        <option value="10th">Class 10th Grade</option>
-                        <option value="11th">Class 11th Grade</option>
-                        <option value="12th">Class 12th Grade</option>
-                        <option value="Library">Library Student</option>
+                        {CLASS_OPTIONS.map(opt => (
+                           <option key={opt} value={opt}>{opt}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -678,6 +708,21 @@ export default function AdminDashboard() {
                           className="w-full text-xs font-mono border border-slate-200 rounded-lg p-2 mt-0.5 bg-white focus:outline-blue-500"
                         />
                       </div>
+                      
+                      {/* 10% Discount Checkbox */}
+                      <div className="col-span-2 flex items-center gap-2 mt-2 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200">
+                        <input 
+                          type="checkbox" 
+                          id="oneTimePayment"
+                          checked={isOneTimePayment}
+                          onChange={(e) => setIsOneTimePayment(e.target.checked)}
+                          className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
+                        />
+                        <label htmlFor="oneTimePayment" className="text-[11px] font-bold text-emerald-800 font-sans cursor-pointer select-none">
+                          Apply One-Time Full Payment (10% Discount)
+                        </label>
+                      </div>
+
                     </div>
                   </div>
 
@@ -717,6 +762,8 @@ export default function AdminDashboard() {
                       <input
                         type="tel"
                         required
+                        pattern="^[6-9]\d{9}$"
+                        title="Please enter a valid 10-digit Indian mobile number."
                         placeholder="e.g. 9876543210"
                         value={parentPhone}
                         onChange={e => setParentPhone(e.target.value)}
@@ -774,20 +821,21 @@ export default function AdminDashboard() {
                   {/* Multiselect Class Grades Assigned */}
                   <div className="space-y-2 text-xs">
                     <label className="text-slate-500 font-semibold font-sans block">Classes Authorized to Teach</label>
-                    <div className="flex gap-2 pt-1 font-mono text-[11px]">
-                      {(['9th', '10th', '11th', '12th'] as ClassGrade[]).map(grade => {
+                    <div className="flex flex-wrap gap-2 pt-1 font-mono text-[11px]">
+                      {CLASS_OPTIONS.filter(c => c !== 'Library').map(grade => {
                         const isSelected = teacherGrades.includes(grade);
                         return (
                           <button
                             type="button"
                             key={grade}
                             onClick={() => handleGradeToggle(grade)}
-                            className={`px-3 py-2 rounded-lg cursor-pointer border text-center transition ${isSelected
-                              ? 'bg-blue-600 text-white font-bold border-blue-650'
-                              : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350 hover:bg-slate-50'
-                              }`}
+                            className={`px-3 py-2 rounded-lg cursor-pointer border text-center transition ${
+                              isSelected 
+                                ? 'bg-blue-600 text-white font-bold border-blue-650' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350 hover:bg-slate-50'
+                            }`}
                           >
-                            Class {grade}
+                            {grade}
                           </button>
                         );
                       })}
@@ -810,7 +858,7 @@ export default function AdminDashboard() {
         {/* 3. FEE STRUCTURE & INLINE LEDGER */}
         {activeTab === 'fees' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
-
+            
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -819,20 +867,10 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">Configure structural class policies, view details of pending accounts, and collect payments.</p>
               </div>
-
-              {/* Class policy labels */}
-              <div className="flex flex-wrap gap-2 text-[10px] font-mono font-bold text-slate-500">
-                <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded">Class 9: ₹15,000</span>
-                <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded">Class 10: ₹18,000</span>
-                <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded">Class 11: ₹22,000</span>
-                <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded">Class 12: ₹25,000</span>
-                <span className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-155 rounded">Library Student: ₹5,000</span>
-              </div>
             </div>
 
             {/* Quick summary and ledger tools */}
             <div className="flex flex-col sm:flex-row gap-3.5 justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-              {/* Ledger search */}
               <div className="relative w-full sm:w-72">
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                 <input
@@ -844,18 +882,17 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              {/* Filters */}
               <div className="flex items-center gap-2.5 text-xs font-semibold self-end sm:self-auto uppercase tracking-wide">
                 <span className="text-slate-400 font-mono text-[10px]">Filter Grade:</span>
-                <div className="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-mono">
-                  {(['ALL', '9th', '10th', '11th', '12th', 'Library'] as const).map(f => (
+                <div className="flex flex-wrap bg-slate-200 p-0.5 rounded-lg text-[10px] font-mono gap-1">
+                  {['ALL', ...CLASS_OPTIONS].map(f => (
                     <button
                       type="button"
                       key={f}
                       onClick={() => setFeeGradeFilter(f)}
                       className={`px-2 py-1 rounded-md transition duration-100 cursor-pointer ${feeGradeFilter === f ? 'bg-white text-slate-800 font-bold shadow-xs' : 'text-slate-505 text-slate-500 hover:text-slate-700'}`}
                     >
-                      {f}
+                      {f.replace('Semi Eng (Maths, Science, English)', 'Semi').replace('Board + CET', 'B+C')}
                     </button>
                   ))}
                 </div>
@@ -863,8 +900,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Student Ledger List */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto shadow-2xs">
-              <table className="w-full text-left border-collapse text-xs text-slate-500">
+            <div className="border border-slate-200 rounded-xl overflow-x-auto shadow-2xs">
+              <table className="w-full min-w-[800px] text-left border-collapse text-xs text-slate-500">
                 <thead className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-mono text-slate-400 font-bold">
                   <tr>
                     <th className="py-3 px-4">Student</th>
@@ -879,8 +916,8 @@ export default function AdminDashboard() {
                 <tbody className="divide-y divide-slate-100 bg-white text-slate-755 text-slate-700">
                   {students
                     .filter(s => {
-                      const matchesSearch = s.name.toLowerCase().includes(feeSearch.toLowerCase()) ||
-                        s.username.toLowerCase().includes(feeSearch.toLowerCase());
+                      const matchesSearch = s.name.toLowerCase().includes(feeSearch.toLowerCase()) || 
+                                            s.username.toLowerCase().includes(feeSearch.toLowerCase());
                       const matchesGrade = feeGradeFilter === 'ALL' || s.classGrade === feeGradeFilter;
                       return matchesSearch && matchesGrade;
                     })
@@ -903,10 +940,11 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide ${s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wide ${
+                              s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                               s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                                'bg-red-50 text-red-700 border border-red-100'
-                              }`}>
+                              'bg-red-50 text-red-700 border border-red-100'
+                            }`}>
                               {s.paymentStatus || 'PENDING'}
                             </span>
                           </td>
@@ -983,51 +1021,52 @@ export default function AdminDashboard() {
               />
             </div>
 
-            {/* Table layout */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">              <table className="w-full text-xs text-left text-slate-500 border-collapse">
-              <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
-                <tr>
-                  <th className="py-3 px-4">Time</th>
-                  <th className="py-3 px-4">Operator</th>
-                  <th className="py-3 px-4">Level</th>
-                  <th className="py-3 px-4">Operation Verified</th>
-                  <th className="py-3 px-4 text-right font-mono">IP Check</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {activityLogs
-                  .filter(log =>
-                    log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
-                    log.userName.toLowerCase().includes(logSearch.toLowerCase())
-                  )
-                  .slice(0, 15)
-                  .map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
-                      <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
-                        {new Date(log.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
-                        {log.userName}
-                      </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
-                          log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
+            <div className="border border-slate-200 rounded-xl overflow-x-auto">
+              <table className="w-full min-w-[700px] text-xs text-left text-slate-500 border-collapse">
+                <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
+                  <tr>
+                    <th className="py-3 px-4">Time</th>
+                    <th className="py-3 px-4">Operator</th>
+                    <th className="py-3 px-4">Level</th>
+                    <th className="py-3 px-4">Operation Verified</th>
+                    <th className="py-3 px-4 text-right font-mono">IP Check</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {activityLogs
+                    .filter(log => 
+                      log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
+                      log.userName.toLowerCase().includes(logSearch.toLowerCase())
+                    )
+                    .slice(0, 15)
+                    .map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
+                        <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleTimeString()}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
+                          {log.userName}
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${
+                            log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
+                            log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
                             log.userRole === 'STUDENT' ? 'bg-slate-50 text-slate-600' :
-                              'bg-amber-50 text-amber-700'
+                            'bg-amber-50 text-amber-700'
                           }`}>
-                          {log.userRole}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-600 font-medium">
-                        {log.action}
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
-                        {log.ipAddress}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+                            {log.userRole}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600 font-medium">
+                          {log.action}
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
+                          {log.ipAddress}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -1044,11 +1083,10 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* Creator Form */}
               <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 space-y-4">
                 <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest font-mono">Create Schedule Slot</h3>
-
-                <form
+                
+                <form 
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!ttSubject.trim() || !ttTeacher) {
@@ -1056,7 +1094,7 @@ export default function AdminDashboard() {
                       return;
                     }
                     addTimetableEntry({
-                      classGrade: ttClassGrade,
+                      classGrade: ttClassGrade as ClassGrade,
                       day: ttDay,
                       timeSlot: ttTimeSlot,
                       subject: ttSubject.trim(),
@@ -1070,14 +1108,12 @@ export default function AdminDashboard() {
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Class Division</label>
                     <select
                       value={ttClassGrade}
-                      onChange={e => setTtClassGrade(e.target.value as ClassGrade)}
+                      onChange={e => setTtClassGrade(e.target.value)}
                       className="w-full text-xs border border-slate-200 rounded-lg p-2.5 bg-white focus:outline-blue-500"
                     >
-                      <option value="9th">9th Standard</option>
-                      <option value="10th">10th Standard</option>
-                      <option value="11th">11th Standard</option>
-                      <option value="12th">12th Standard</option>
-                      <option value="Library">Library Sessions</option>
+                      {CLASS_OPTIONS.map(opt => (
+                         <option key={opt} value={opt}>{opt}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -1148,19 +1184,17 @@ export default function AdminDashboard() {
                 </form>
               </div>
 
-              {/* Schedules View */}
               <div className="xl:col-span-2 space-y-4">
                 <div className="bg-slate-50 p-2 border border-slate-200 rounded-xl flex items-center justify-between">
                   <span className="text-xs text-slate-500 font-bold ml-2 font-mono">Select Active Class Division for Filter:</span>
                   <select
                     value={ttClassGrade}
-                    onChange={e => setTtClassGrade(e.target.value as ClassGrade)}
-                    className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-blue-500 font-bold text-blue-700"
+                    onChange={e => setTtClassGrade(e.target.value)}
+                    className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-blue-500 font-bold text-blue-700 max-w-[200px] truncate"
                   >
-                    <option value="9th">Class 9th Schedules</option>
-                    <option value="10th">Class 10th Schedules</option>
-                    <option value="11th">Class 11th Schedules</option>
-                    <option value="12th">Class 12th Schedules</option>
+                    {CLASS_OPTIONS.map(opt => (
+                       <option key={opt} value={opt}>{opt}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -1212,7 +1246,7 @@ export default function AdminDashboard() {
       {/* OVERLAY MODALS FOR REGISTRY DIRECTORIES */}
       {showStudentListModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-6xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-8xl w-full max-h-[85vh] overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h2 className="text-base font-black text-slate-950 flex items-center gap-2">
@@ -1220,7 +1254,7 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">Comprehensive real-time student log containing student credentials and outstanding fee metrics.</p>
               </div>
-              <button
+              <button 
                 onClick={() => setShowStudentListModal(false)}
                 className="p-1 px-2.5 rounded bg-slate-100 hover:bg-slate-250 text-slate-650 hover:bg-slate-200 text-xs transition cursor-pointer font-bold"
               >
@@ -1231,8 +1265,8 @@ export default function AdminDashboard() {
             <div className="p-5 border-b border-slate-100 bg-white">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   placeholder="Search students by name, card number or Class grade..."
                   value={studentSearchText}
                   onChange={e => setStudentSearchText(e.target.value)}
@@ -1243,24 +1277,24 @@ export default function AdminDashboard() {
 
             <div className="p-5 overflow-y-auto flex-1 bg-white">
               <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
-                <table className="w-full text-xs text-left text-slate-500 border-collapse">
+                <table className="w-full min-w-[1300px] text-xs text-left text-slate-500 border-collapse table-fixed">
                   <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
                     <tr>
-                      <th className="py-2.5 px-3">Student Details</th>
-                      <th className="py-2.5 px-3">Parent Details</th>
-                      <th className="py-2.5 px-3">Class Grade</th>
-                      <th className="py-2.5 px-3">Student Login Info</th>
-                      <th className="py-2.5 px-3">Parent Login Info</th>
-                      <th className="py-2.5 px-3">Total Fee</th>
-                      <th className="py-2.5 px-3">Paid Fee</th>
-                      <th className="py-2.5 px-3">Pending Fee</th>
-                      <th className="py-2.5 px-3">Fee Status</th>
-                      <th className="py-2.5 px-3 text-center">Action</th>
+                      <th className="py-2.5 px-3 w-[160px]">Student Details</th>
+                      <th className="py-2.5 px-3 w-[160px]">Parent Details</th>
+                      <th className="py-2.5 px-3 w-[100px]">Class Grade</th>
+                      <th className="py-2.5 px-3 w-[180px]">Student Login Info</th>
+                      <th className="py-2.5 px-3 w-[180px] bg-amber-50/40 text-amber-900 border-l border-slate-100">Parent Login Info</th>
+                      <th className="py-2.5 px-3 w-[90px]">Total Fee</th>
+                      <th className="py-2.5 px-3 w-[90px]">Paid Fee</th>
+                      <th className="py-2.5 px-3 w-[90px]">Pending Fee</th>
+                      <th className="py-2.5 px-3 w-[100px]">Fee Status</th>
+                      <th className="py-2.5 px-3 w-[70px] text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {students
-                      .filter(s =>
+                      .filter(s => 
                         s.name.toLowerCase().includes(studentSearchText.toLowerCase()) ||
                         s.classGrade.toLowerCase().includes(studentSearchText.toLowerCase()) ||
                         s.studentIdCardNum.toLowerCase().includes(studentSearchText.toLowerCase()) ||
@@ -1270,17 +1304,17 @@ export default function AdminDashboard() {
                         const linkedParent = parents.find(p => p.childId === s.id);
                         return (
                           <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-2.5 px-3">
+                            <td className="py-2.5 px-3 whitespace-normal break-words">
                               <p className="font-bold text-slate-900">{s.name}</p>
                               <p className="text-[10px] text-slate-400 font-mono">{s.studentIdCardNum}</p>
                               {(s.seatNumber || s.benchNumber) && (
-                                <div className="mt-1 flex gap-1.5 text-[9px] font-mono leading-relaxed">
+                                <div className="mt-1 flex flex-wrap gap-1 text-[9px] font-mono leading-relaxed">
                                   {s.seatNumber && <span className="bg-blue-50 text-blue-700 border border-blue-105 px-1.5 py-0.2 rounded">Seat: {s.seatNumber}</span>}
                                   {s.benchNumber && <span className="bg-purple-50 text-purple-700 border border-purple-105 px-1.5 py-0.2 rounded">Bench: {s.benchNumber}</span>}
                                 </div>
                               )}
                             </td>
-                            <td className="py-2.5 px-3">
+                            <td className="py-2.5 px-3 whitespace-normal break-words">
                               {linkedParent ? (
                                 <div>
                                   <p className="font-bold text-slate-700">{linkedParent.name}</p>
@@ -1291,7 +1325,7 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td className="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">
-                              Class {s.classGrade}
+                              {s.classGrade}
                             </td>
                             <td className="py-2.5 px-3 whitespace-nowrap bg-blue-50/30">
                               <div className="flex flex-col text-[10px] space-y-0.5">
@@ -1310,14 +1344,14 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
                             <td className="py-2.5 px-3 font-mono text-emerald-600 font-bold">₹{s.paidFee}</td>
                             <td className="py-2.5 px-3 font-mono text-red-650 text-red-600 font-bold">₹{s.pendingFee}</td>
                             <td className="py-2.5 px-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border ${s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border ${
+                                s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                                 s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                  'bg-red-50 text-red-700 border-red-200'
-                                }`}>
+                                'bg-red-50 text-red-700 border-red-200'
+                              }`}>
                                 {s.paymentStatus}
                               </span>
                             </td>
@@ -1364,7 +1398,7 @@ export default function AdminDashboard() {
 
       {showTeacherListModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h2 className="text-base font-black text-slate-950 flex items-center gap-2">
@@ -1372,7 +1406,7 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">Comprehensive real-time teacher roster containing access IDs and tutoring subject specializations.</p>
               </div>
-              <button
+              <button 
                 onClick={() => setShowTeacherListModal(false)}
                 className="p-1 px-2.5 rounded bg-slate-100 hover:bg-slate-250 text-slate-650 hover:bg-slate-200 text-xs transition cursor-pointer font-bold"
               >
@@ -1383,8 +1417,8 @@ export default function AdminDashboard() {
             <div className="p-5 border-b border-slate-100 bg-white">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   placeholder="Search teachers by name or subject specialty..."
                   value={teacherSearchText}
                   onChange={e => setTeacherSearchText(e.target.value)}
@@ -1394,85 +1428,86 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-5 overflow-y-auto flex-1 bg-white">
-              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">                <table className="w-full text-xs text-left text-slate-500 border-collapse">
-                <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
-                  <tr>
-                    <th className="py-2.5 px-3">Faculty Name</th>
-                    <th className="py-2.5 px-3">Subjects Taught</th>
-                    <th className="py-2.5 px-3">Assigned Classes</th>
-                    <th className="py-2.5 px-3">Login Credentials Info</th>
-                    <th className="py-2.5 px-3 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {teachers
-                    .filter(t =>
-                      t.name.toLowerCase().includes(teacherSearchText.toLowerCase()) ||
-                      t.subjects.some(subj => subj.toLowerCase().includes(teacherSearchText.toLowerCase()))
-                    )
-                    .map(t => (
-                      <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
-                          {t.name}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <div className="flex flex-wrap gap-1">
-                            {t.subjects.map(sub => (
-                              <span key={sub} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[9px] font-bold uppercase tracking-wider font-mono">
-                                {sub}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <div className="flex flex-wrap gap-1">
-                            {t.classes.map(cl => (
-                              <span key={cl} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[9px] font-mono">
-                                Class {cl}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3 whitespace-nowrap bg-emerald-50/30">
-                          <div className="flex flex-col text-[10px] space-y-0.5">
-                            <span className="font-semibold text-slate-700">Login ID: <span className="font-bold text-emerald-800 font-sans">{t.username}</span></span>
-                            <span className="text-slate-500 font-mono">Password: <span className="font-bold text-slate-700">{t.username}123</span></span>
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                          {confirmDeleteTeacherId === t.id ? (
-                            <div className="flex items-center gap-1.5 justify-center">
-                              <button
-                                onClick={() => {
-                                  deleteTeacher(t.id);
-                                  setConfirmDeleteTeacherId(null);
-                                }}
-                                className="px-2 py-1 bg-red-650 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
-                              >
-                                Yes
-                              </button>
-                              <button
-                                onClick={() => setConfirmDeleteTeacherId(null)}
-                                className="px-2 py-1 bg-slate-250 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
-                              >
-                                No
-                              </button>
+              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
+                <table className="w-full min-w-[800px] text-xs text-left text-slate-500 border-collapse">
+                  <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
+                    <tr>
+                      <th className="py-2.5 px-3">Faculty Name</th>
+                      <th className="py-2.5 px-3">Subjects Taught</th>
+                      <th className="py-2.5 px-3">Assigned Classes</th>
+                      <th className="py-2.5 px-3">Login Credentials Info</th>
+                      <th className="py-2.5 px-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {teachers
+                      .filter(t => 
+                        t.name.toLowerCase().includes(teacherSearchText.toLowerCase()) ||
+                        t.subjects.some(subj => subj.toLowerCase().includes(teacherSearchText.toLowerCase()))
+                      )
+                      .map(t => (
+                        <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">
+                            {t.name}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex flex-wrap gap-1">
+                              {t.subjects.map(sub => (
+                                <span key={sub} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[9px] font-bold uppercase tracking-wider font-mono">
+                                  {sub}
+                                </span>
+                              ))}
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmDeleteTeacherId(t.id)}
-                              className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
-                              title="Delete Faculty Member"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex flex-wrap gap-1">
+                              {t.classes.map(cl => (
+                                <span key={cl} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[9px] font-mono">
+                                  {cl}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap bg-emerald-50/30">
+                            <div className="flex flex-col text-[10px] space-y-0.5">
+                              <span className="font-semibold text-slate-700">Login ID: <span className="font-bold text-emerald-800 font-sans">{t.username}</span></span>
+                              <span className="text-slate-500 font-mono">Password: <span className="font-bold text-slate-700">{t.username}123</span></span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            {confirmDeleteTeacherId === t.id ? (
+                              <div className="flex items-center gap-1.5 justify-center">
+                                <button
+                                  onClick={() => {
+                                    deleteTeacher(t.id);
+                                    setConfirmDeleteTeacherId(null);
+                                  }}
+                                  className="px-2 py-1 bg-red-650 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDeleteTeacherId(null)}
+                                  className="px-2 py-1 bg-slate-250 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmDeleteTeacherId(t.id)}
+                                className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
+                                title="Delete Faculty Member"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
