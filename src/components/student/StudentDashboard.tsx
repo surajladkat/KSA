@@ -58,9 +58,6 @@ export default function StudentDashboard() {
     reader.readAsText(file);
   };
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
   const handleSubmitHomework = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeSubmitAsgId || !submissionBoxText.trim()) return;
@@ -75,7 +72,9 @@ useEffect(() => {
   const handleDownloadAndDecrypt = (materialId: string) => {
     setDecryptedMaterialId(materialId === decryptedMaterialId ? null : materialId);
   };
-
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   const handleDownloadFile = (fileName: string, encryptedContent: string) => {
     try {
       const decrypted = decryptData(encryptedContent, 'SCHOOL_SECRET_KEY');
