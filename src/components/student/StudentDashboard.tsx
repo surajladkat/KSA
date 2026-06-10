@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { decryptData } from '../../cryptoUtils';
 import { BookOpen, Calendar, CheckCircle2, AlertCircle, Play, Download, Lock, Unlock, FileText, Send, Award, Users, GraduationCap, Upload } from 'lucide-react';
@@ -23,7 +23,9 @@ export default function StudentDashboard() {
   } = useSchool();
 
   const student = currentUser as any;
-
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   // Active navigation tab
   const [activeTab, setActiveTab] = useState<'study-folder' | 'assignments-desk' | 'grades' | 'timetable' | 'faculty-directory' | 'attendance'>('assignments-desk');
 

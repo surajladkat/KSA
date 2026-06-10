@@ -74,6 +74,9 @@ export default function AdminDashboard() {
     deleteTeacher
   } = useSchool();
 
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   // Active Main Tab
   const [activeTab, setActiveTab] = useState<'analytics' | 'onboarding' | 'fees' | 'logs' | 'timetable'>('analytics');
   
