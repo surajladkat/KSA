@@ -58,9 +58,6 @@ const FEE_MAP: Record<string, number> = {
   'Library': 5000
 };
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
 export default function AdminDashboard() {
   const { 
     students, 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState,useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { ClassGrade, StudyMaterial, Assignment, AttendanceStatus, AttendanceRecord } from '../../types';
 import { decryptData } from '../../cryptoUtils';
@@ -59,10 +59,7 @@ export default function TeacherDashboard() {
     });
     setAttRecords(initial);
   }, [attClass, attSubject, attDate, students, attendance]);
-// Force the window to stay at the absolute top layout position when Admin mounts
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, [])
+
   // Study material form state
   const [matTitle, setMatTitle] = useState('');
   const [matDesc, setMatDesc] = useState('');
