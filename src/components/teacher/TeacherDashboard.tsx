@@ -59,9 +59,10 @@ export default function TeacherDashboard() {
     });
     setAttRecords(initial);
   }, [attClass, attSubject, attDate, students, attendance]);
+// Force the window to stay at the absolute top layout position when Admin mounts
 useEffect(() => {
   window.scrollTo(0, 0);
-}, []);
+}, [])
   // Study material form state
   const [matTitle, setMatTitle] = useState('');
   const [matDesc, setMatDesc] = useState('');
