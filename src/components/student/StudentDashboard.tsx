@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { decryptData } from '../../cryptoUtils';
 import { BookOpen, Calendar, CheckCircle2, AlertCircle, Play, Download, Lock, Unlock, FileText, Send, Award, Users, GraduationCap, Upload } from 'lucide-react';
@@ -58,6 +58,9 @@ export default function StudentDashboard() {
     reader.readAsText(file);
   };
 
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   const handleSubmitHomework = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeSubmitAsgId || !submissionBoxText.trim()) return;

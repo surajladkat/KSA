@@ -20,7 +20,7 @@ function AppContent() {
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
         <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         <p className="text-slate-600 text-sm font-medium tracking-wide">
-          Connecting to server wait for seconds..
+          Connecting to server wait for seconds...
         </p>
       </div>
     );
