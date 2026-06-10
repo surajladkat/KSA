@@ -61,52 +61,56 @@ export default function Header() {
         </span>
 
         {/* Realtime Alert popover */}
-        <div className="relative">
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNotificationClick}
-            className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition relative border border-slate-200 cursor-pointer"
-          >
-            <Bell className="w-4 h-4" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white font-bold text-[9px] rounded-full flex items-center justify-center animate-bounce shadow-sm">
-                {unreadCount}
-              </span>
-            )}
-          </motion.button>
+       <div className="relative">
+  <motion.button 
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={handleNotificationClick}
+    className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition relative border border-slate-200 cursor-pointer"
+  >
+    <Bell className="w-4 h-4" />
+    {unreadCount > 0 && (
+      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white font-bold text-[9px] rounded-full flex items-center justify-center animate-bounce shadow-sm">
+        {unreadCount}
+      </span>
+    )}
+  </motion.button>
 
-          {showNotifications && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-3.5 w-80 bg-white border border-slate-200/85 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] p-4 space-y-3 z-50 text-left"
-            >
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                <span className="text-xs font-bold text-slate-850">Real-Time Alerts Log</span>
-                <span className="text-[9px] bg-blue-50 text-blue-700 font-bold px-1.5 py-0.5 rounded uppercase font-mono">Synced</span>
-              </div>
+  {showNotifications && (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      /* FIXED CLASSES BELOW: 
+         - Changed `absolute right-0` to a screen-snapping fix: `fixed right-4 left-4 sm:absolute sm:left-auto sm:right-0`
+         - Changed `w-80` to `w-auto sm:w-80` so it expands nicely on mobile layout limits without clipping
+      */
+      className="fixed right-4 left-4 sm:absolute sm:left-auto sm:right-0 mt-3.5 w-auto sm:w-80 bg-white border border-slate-200/85 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] p-4 space-y-3 z-50 text-left"
+    >
+      <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+        <span className="text-xs font-bold text-slate-850">Real-Time Alerts Log</span>
+        <span className="text-[9px] bg-blue-50 text-blue-700 font-bold px-1.5 py-0.5 rounded uppercase font-mono">Synced</span>
+      </div>
 
-              <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-                {myNotifications.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-6 text-center font-sans">No recent alerts recorded.</p>
-                ) : (
-                  myNotifications.map((notif) => (
-                    <div key={notif.id} className="p-2.5 bg-slate-50/50 rounded-xl space-y-1 hover:bg-slate-50 transition border border-slate-100/60">
-                      <div className="flex justify-between items-start">
-                        <span className="text-xs font-bold text-slate-800 leading-tight">{notif.title}</span>
-                        {!notif.read && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1" />}
-                      </div>
-                      <p className="text-[10px] text-slate-500 leading-normal">{notif.message}</p>
-                      <p className="text-[9px] text-slate-400 font-mono text-right">{new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                    </div>
-                  ))
-                )}
+      <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+        {myNotifications.length === 0 ? (
+          <p className="text-xs text-slate-400 italic py-6 text-center font-sans">No recent alerts recorded.</p>
+        ) : (
+          myNotifications.map((notif) => (
+            <div key={notif.id} className="p-2.5 bg-slate-50/50 rounded-xl space-y-1 hover:bg-slate-50 transition border border-slate-100/60">
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-800 leading-tight">{notif.title}</span>
+                {!notif.read && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1" />}
               </div>
-            </motion.div>
-          )}
-        </div>
+              <p className="text-[10px] text-slate-500 leading-normal">{notif.message}</p>
+              <p className="text-[9px] text-slate-400 font-mono text-right">{new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </motion.div>
+  )}
+</div>
 
         {/* User Identity Details Card */}
         <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
