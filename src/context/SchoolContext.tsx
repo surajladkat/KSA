@@ -418,23 +418,26 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // ─── Admin: delete student ────────────────────────────────────────────────────
   const deleteStudent = async (studentId: string) => {
-    if (!currentUser || currentUser.role !== 'ADMIN') return;
-    const target = students.find(s => s.id === studentId);
-    if (!target) return;
+  if (!currentUser || currentUser.role !== 'ADMIN') return;
+  
+  const target = students.find(s => s.id === studentId);
+  if (!target) return;
 
-    const linkedParent = parents.find(p => p.childId === studentId);
+  // TRAP 2 BYPASS: Use the student's own record to find the parent ID.
+  // If target.parentId is missing, fallback to searching the parents array.
+  const parentIdToDelete = target.parentId || parents.find(p => p.childId === studentId)?.id;
 
-    await Promise.all([
-      deleteDocument(COLLECTIONS.STUDENTS, studentId),
-      linkedParent ? deleteDocument(COLLECTIONS.PARENTS, linkedParent.id) : Promise.resolve(),
-    ]);
+  await Promise.all([
+    deleteDocument(COLLECTIONS.STUDENTS, studentId),
+    parentIdToDelete ? deleteDocument(COLLECTIONS.PARENTS, parentIdToDelete) : Promise.resolve(),
+  ]);
 
-    await logActivity(
-      currentUser.id, currentUser.name, 'ADMIN',
-      `Expelled student: ${target.name} (${target.classGrade}) and revoked parent access`,
-    );
-    await addToastNotification(currentUser.id, 'Student Deleted', `${target.name} and linked parent removed.`, 'INFO');
-  };
+  await logActivity(
+    currentUser.id, currentUser.name, 'ADMIN',
+    `Expelled student: ${target.name} (${target.classGrade}) and revoked parent access`,
+  );
+  await addToastNotification(currentUser.id, 'Student Deleted', `${target.name} and linked parent removed.`, 'INFO');
+};
 
   // ─── Admin: delete teacher ────────────────────────────────────────────────────
   const deleteTeacher = async (teacherId: string) => {
