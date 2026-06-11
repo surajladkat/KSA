@@ -5,7 +5,19 @@
 
 export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT';
 
-export type ClassGrade = '9th' | '10th' | '11th' | '12th' | 'Library';
+// ✅ FIX 1: Updated with all new specific class categories
+export type ClassGrade = 
+  | '9th Semi Eng (Maths, Science, English)' 
+  | '9th CBSE' 
+  | '10th Semi Eng (Maths, Science, English)' 
+  | '10th CBSE' 
+  | '11th Board' 
+  | '11th CET' 
+  | '11th Board + CET' 
+  | '12th Board' 
+  | '12th CET' 
+  | '12th Board + CET' 
+  | 'Library';
 
 export interface User {
   id: string;
@@ -57,6 +69,7 @@ export interface StudyMaterial {
   fileName: string;
   fileSize: string;
   fileContent: string; // Encrypted content string (Base64-like simulating ciphertext)
+  link?: string; // ✅ FIX 2: Added to support Google Drive / Web Links
   uploadedBy: string; // Teacher name
   uploadedAt: string;
 }
@@ -119,6 +132,7 @@ export interface ActivityLog {
   action: string;
   timestamp: string;
   ipAddress: string;
+  expireAt?: any; // ✅ FIX 3: Added for Firebase TTL Auto-Delete
 }
 
 export interface TimetableEntry {
@@ -144,4 +158,3 @@ export interface AttendanceRecord {
   subject: string;
   remarks?: string;
 }
-
