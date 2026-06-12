@@ -27,9 +27,8 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 py-6 px-4 md:px-8 space-y-6">
-      {currentUser && <Header />}
-      <main className="mx-auto max-w-7xl">
+<div className="min-h-screen w-full bg-slate-50 font-sans text-slate-900 overflow-x-hidden">      {currentUser && <Header />}
+      <main className="w-full h-full">
         {!currentUser ? (
           <Login />
         ) : (
