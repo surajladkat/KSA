@@ -8,29 +8,37 @@ import { useSchool } from '../../context/SchoolContext';
 import { ShieldAlert, LogIn, Users, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// 📸 तुमच्या 'assets' फोल्डरमधून इमेजेस ऍड करण्यासाठीच्या सूचना:
-// 1. तुमचे फोटो src/assets/ फोल्डरमध्ये टाका.
-// 2. खालीलप्रमाणे त्यांना इम्पोर्ट करा (कमेंट्स काढून टाका):
-// import ClassPhoto1 from '../../assets/class-photo-1.jpg';
-// import ClassPhoto2 from '../../assets/class-photo-2.jpg';
-// import ClassPhoto3 from '../../assets/class-photo-3.jpg';
-
+// ✅ FIX: .jpg ऐवजी .jpeg केले आहे (तुमच्या फाईल्सच्या नावानुसार)
+import ClassPhoto1 from '../../assets/class-photo-1.jpeg';
+import ClassPhoto2 from '../../assets/class-photo-2.jpeg';
+import ClassPhoto3 from '../../assets/class-photo-3.jpeg';
+import ClassPhoto4 from '../../assets/class-photo-4.jpeg';
+import ClassPhoto5 from '../../assets/class-photo-5.jpeg';
 const SLIDER_IMAGES = [
   {
-    // 3. इथे 'url' च्या पुढे सिंगल कोट्स ('') काढून थेट व्हेरिएबलचे नाव लिहा. उदा: url: ClassPhoto1,
-    url: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1600&q=80',
-    title: 'Digital Classrooms',
-    desc: 'Access your coursework and resources from anywhere.'
+    url: ClassPhoto1,
+    title: 'Smart Digital Classrooms',
+    desc: 'Experience interactive learning with 24/7 access to your coursework and study resources.'
   },
   {
-    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80',
-    title: 'Collaborative Study',
-    desc: 'Direct interaction channels between teachers and students.'
+    url: ClassPhoto2,
+    title: 'Seamless Collaboration',
+    desc: 'Foster better learning with direct interaction channels between our expert faculty and students.'
   },
   {
-    url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80',
-    title: 'Real-time Progress',
-    desc: 'Track grades, performance analytics, and fee ledgers instantly.'
+    url: ClassPhoto4,
+    title: 'Board & CET Excellence',
+    desc: 'Curated assignments and reference materials designed to help you conquer your exams.'
+  },
+  {
+    url: ClassPhoto5,
+    title: 'Transparent Parent Connect',
+    desc: 'Bridging the gap with secure dialogue portals to keep parents updated on their child\'s success.'
+  },
+  {
+    url: ClassPhoto3,
+    title: 'Real-Time Performance Tracking',
+    desc: 'Instantly monitor academic grades, daily attendance roll calls, and fee ledger updates.'
   }
 ];
 
@@ -95,10 +103,9 @@ export default function Login() {
   };
 
   return (
-    // Master layout: Full height, split screen on desktop
     <div className="flex min-h-screen w-full bg-slate-50 font-sans overflow-hidden relative">
       
-      {/* ⬅️ LEFT SIDE: Full-Page Photo Slider (Hidden on Mobile, visible on Desktop) */}
+      {/* ⬅️ LEFT SIDE: Full-Page Photo Slider */}
       <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative overflow-hidden bg-slate-900">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
@@ -111,16 +118,13 @@ export default function Login() {
             transition={{ x: { type: "spring", stiffness: 150, damping: 22 }, opacity: { duration: 0.4 } }}
             className="absolute inset-0 w-full h-full"
           >
-            {/* The Image */}
             <img 
               src={SLIDER_IMAGES[imageIndex].url} 
               alt={SLIDER_IMAGES[imageIndex].title} 
               className="w-full h-full object-cover opacity-85"
             />
-            {/* Dark premium overlay gradient to make text readable */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
             
-            {/* Dynamic Text Captions over the photo */}
             <div className="absolute bottom-16 left-12 right-12 text-left text-white z-10 space-y-3">
               <span className="text-[11px] bg-blue-600/90 backdrop-blur-md text-white font-bold px-3 py-1.5 rounded-full uppercase tracking-wider font-mono shadow-lg">
                 {SLIDER_IMAGES[imageIndex].title}
@@ -132,7 +136,6 @@ export default function Login() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Floating Manual Controls inside the image */}
         <div className="absolute bottom-12 right-12 z-20 flex gap-3">
           <button 
             type="button" 
@@ -151,17 +154,15 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ➡️ RIGHT SIDE: Login Form (Takes full width on Mobile, centered beautifully) */}
+      {/* ➡️ RIGHT SIDE: Login Form */}
       <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col justify-center px-6 sm:px-12 md:px-16 lg:px-12 xl:px-16 relative bg-white shadow-[-20px_0_40px_rgba(0,0,0,0.05)] z-10 h-screen overflow-y-auto">
         
-        {/* Mobile Background Fallback: Subtle background on small screens */}
         <div className="absolute inset-0 lg:hidden z-0 opacity-[0.03] pointer-events-none">
           <img src={SLIDER_IMAGES[imageIndex].url} className="w-full h-full object-cover" alt="mobile-bg" />
         </div>
 
         <div className="w-full max-w-md mx-auto space-y-8 z-10 py-10">
           
-          {/* Brand Header */}
           <div className="text-left space-y-3">
             <span className="text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider font-mono border border-blue-100 inline-block">
               Private Academy Hub
@@ -174,7 +175,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Quick Features Badges */}
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex gap-2.5 items-start">
               <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
@@ -186,7 +186,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Error Message */}
           {errorMsg && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
@@ -198,7 +197,6 @@ export default function Login() {
             </motion.div>
           )}
 
-          {/* The Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5 w-full">
             <div className="space-y-1.5 w-full">
               <label className="text-xs text-slate-600 font-bold font-sans uppercase tracking-wide">Authorized ID (Username)</label>
@@ -235,7 +233,6 @@ export default function Login() {
             </motion.button>
           </form>
 
-          {/* Default Credentials Info Box */}
           <div className="pt-6 border-t border-slate-100 flex flex-col gap-2 text-xs text-slate-500 font-sans w-full">
             <p className="font-semibold text-slate-600">Initial Setup & Access:</p>
             <p className="leading-relaxed">Only the administrative office can issue new student and teacher accounts.</p>
@@ -247,7 +244,6 @@ export default function Login() {
 
         </div>
       </div>
-
     </div>
   );
 }

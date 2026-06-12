@@ -55,7 +55,7 @@ export default function StudentDashboard() {
       const content = e.target?.result as string || '';
       setSubmissionBoxText(content);
     };
-    reader.readAsText(file);
+   reader.readAsDataURL(file);
   };
 
   const handleSubmitHomework = (e: React.FormEvent) => {

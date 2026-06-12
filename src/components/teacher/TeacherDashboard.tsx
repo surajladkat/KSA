@@ -10,6 +10,32 @@ import { decryptData } from '../../cryptoUtils';
 import { Upload, PlusCircle, CheckSquare, MessageSquare, BookOpen, Send, Lock, Unlock, Award, ChevronRight, FileText, Calendar, Download, AlertCircle, Trash2, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+// HELPER: Get correct MIME type based on file extension
+const getMimeType = (fileName: string): string => {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg':
+    case 'jpeg': return 'image/jpeg';
+    case 'pdf': return 'application/pdf';
+    case 'doc':
+    case 'docx': return 'application/msword';
+    default: return 'text/plain'; // fallback
+  }
+};
+
+// HELPER: Convert Base64/DataURL to Blob for correct downloading
+const dataURItoBlob = (dataURI: string): Blob => {
+  const byteString = atob(dataURI.split(',')[1]);
+  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+};
+
 export default function TeacherDashboard() {
   const {
     currentUser,
@@ -33,19 +59,16 @@ export default function TeacherDashboard() {
 
   const [activeSubTab, setActiveSubTab] = useState<'material' | 'assignment' | 'submissions' | 'communications' | 'timetable' | 'attendance'>('submissions');
 
-  // Attendance states - dynamically initialized to teacher's first assigned class/subject
+  // Attendance states
   const [attClass, setAttClass] = useState<ClassGrade>(teacher?.classes?.[0] || '9th');
   const [attSubject, setAttSubject] = useState<string>(teacher?.subjects?.[0] || '');
   const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0]);
   
-  // Custom records dictionary that holds { studentId: { status, remarks } }
   const [attRecords, setAttRecords] = useState<Record<string, { status: AttendanceStatus; remarks: string }>>({});
 
-  // Auto initialize default attendance status for student roster
   const activeClassStudents = students.filter(s => s.classGrade === attClass);
   
   React.useEffect(() => {
-    // Build initial status state
     const initial: Record<string, { status: AttendanceStatus; remarks: string }> = {};
     activeClassStudents.forEach(st => {
       const existing = attendance.find(
@@ -59,7 +82,7 @@ export default function TeacherDashboard() {
     setAttRecords(initial);
   }, [attClass, attSubject, attDate, students, attendance]);
 
-  // Study material form state - dynamically initialized
+  // Study material form state
   const [matTitle, setMatTitle] = useState('');
   const [matDesc, setMatDesc] = useState('');
   const [matClass, setMatClass] = useState<ClassGrade>(teacher?.classes?.[0] || '9th');
@@ -101,13 +124,21 @@ export default function TeacherDashboard() {
       const content = e.target?.result as string || '';
       setMatFileContent(content);
     };
-    reader.readAsText(file);
+    reader.readAsDataURL(file); 
   };
 
   const handleDownloadHomeworkFile = (fileName: string, encryptedContent: string) => {
     try {
       const decrypted = decryptData(encryptedContent, 'SCHOOL_SECRET_KEY');
-      const blob = new Blob([decrypted], { type: 'text/plain;charset=utf-8' });
+      let blob: Blob;
+
+      if (decrypted.startsWith('data:')) {
+        blob = dataURItoBlob(decrypted);
+      } else {
+        const mimeType = getMimeType(fileName);
+        blob = new Blob([decrypted], { type: `${mimeType};charset=utf-8` });
+      }
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -118,13 +149,22 @@ export default function TeacherDashboard() {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Failed to download homework file', e);
+      alert('There was an error decoding this file.');
     }
   };
 
   const handleDownloadMaterialFile = (fileName: string, encryptedContent: string) => {
     try {
       const decrypted = decryptData(encryptedContent, 'SCHOOL_SECRET_KEY');
-      const blob = new Blob([decrypted], { type: 'text/plain;charset=utf-8' });
+      let blob: Blob;
+
+      if (decrypted.startsWith('data:')) {
+        blob = dataURItoBlob(decrypted);
+      } else {
+        const mimeType = getMimeType(fileName);
+        blob = new Blob([decrypted], { type: `${mimeType};charset=utf-8` });
+      }
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -135,6 +175,7 @@ export default function TeacherDashboard() {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Failed to download material file', e);
+      alert('There was an error decoding this material file.');
     }
   };
 
@@ -195,23 +236,19 @@ export default function TeacherDashboard() {
     setInputFeedback('');
   };
 
-  // ✅ INTERNAL WEBSITE DISPATCH FUNCTION (No Annoying Alert)
   const handleSendInternalWebsiteMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedParentId || !chatInput.trim()) return;
 
-    // Direct Portal Sync: वेबसाईटच्या चॅटमध्ये मेसेज सेंड करणे
     sendMessage(selectedParentId, chatInput.trim());
     setChatInput('');
   };
 
-  // WhatsApp trigger function
   const handleSendWhatsAppReport = () => {
     if (!selectedParentId || !chatInput.trim()) return;
 
     const parentUser = parents.find(p => p.id === selectedParentId);
     
-    // Internal save first
     sendMessage(selectedParentId, chatInput.trim());
 
     if (parentUser && parentUser.mobileNumber) {
@@ -260,22 +297,27 @@ export default function TeacherDashboard() {
     setChatInput('');
   };
 
-  const teacherSubmissions = submissions.filter(s => true);
+  // ✅ SECURITY FIX: Filter submissions to only show those matching the teacher's assigned classes
+  const teacherSubmissions = submissions.filter(s => 
+    teacher?.classes?.includes(s.classGrade)
+  );
 
-  // Filters messages belonging to this active teacher-parent dialog channel
   const filteredMessages = messages.filter(m => 
     selectedParentId 
       ? (m.senderId === currentUser?.id && m.receiverId === selectedParentId) || (m.senderId === selectedParentId && m.receiverId === currentUser?.id)
       : (m.senderId === currentUser?.id || m.receiverId === currentUser?.id)
   ).sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-  const parentChoices = parents.map(p => ({
-    id: p.id,
-    display: `${p.name} (Parent of ${p.childName}, Class ${p.childClass})`
-  }));
+  // ✅ SECURITY FIX: Filter parent choices so teacher only sees parents of students in their assigned classes
+  const parentChoices = parents
+    .filter(p => p.childClass && teacher?.classes?.includes(p.childClass))
+    .map(p => ({
+      id: p.id,
+      display: `${p.name} (Parent of ${p.childName}, Class ${p.childClass})`
+    }));
 
-  const gradedCount = submissions.filter(s => s.status === 'GRADED').length;
-  const pendingEvaluation = submissions.filter(s => s.status !== 'GRADED').length;
+  const gradedCount = teacherSubmissions.filter(s => s.status === 'GRADED').length;
+  const pendingEvaluation = teacherSubmissions.filter(s => s.status !== 'GRADED').length;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-1">
@@ -389,9 +431,9 @@ export default function TeacherDashboard() {
             <p className="text-[10px] text-slate-450 font-bold uppercase tracking-wider font-mono">Evaluation Rate</p>
             <div className="flex justify-between items-baseline mt-1 font-mono">
               <span className="text-lg font-bold text-blue-600">
-                {submissions.length ? Math.round((gradedCount / submissions.length) * 100) : 100}%
+                {teacherSubmissions.length ? Math.round((gradedCount / teacherSubmissions.length) * 100) : 100}%
               </span>
-              <span className="text-[10px] text-slate-400">{gradedCount} of {submissions.length}</span>
+              <span className="text-[10px] text-slate-400">{gradedCount} of {teacherSubmissions.length}</span>
             </div>
           </div>
         </div>
@@ -413,6 +455,9 @@ export default function TeacherDashboard() {
                 <div className="space-y-5">
                   {teacherSubmissions.map(sub => {
                     const displayContent = decryptData(sub.submittedContent, 'SCHOOL_SECRET_KEY');
+                    const isImage = displayContent.startsWith('data:image/');
+                    const isOtherFile = displayContent.startsWith('data:') && !isImage;
+                    
                     const safeContent = displayContent.length > 3000 
                       ? displayContent.substring(0, 3000) + '\n\n... [Content Truncated due to large image size. Please download the Answer Sheet file to view properly.]' 
                       : displayContent;
@@ -462,13 +507,22 @@ export default function TeacherDashboard() {
                         <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
                           <div className="border-b border-slate-100 pb-1.5 font-sans">
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                              Student Submitted Answer Text
+                              Student Submitted Answer
                             </span>
                           </div>
-                          <div className="max-h-32 overflow-y-auto custom-scrollbar p-1">
-                            <p className="font-mono text-[11px] text-slate-600 whitespace-pre-wrap leading-relaxed break-all">
-                              {safeContent}
-                            </p>
+                          <div className="max-h-96 overflow-y-auto custom-scrollbar p-1">
+                            {isImage ? (
+                              <img src={displayContent} alt="Student Work" className="w-full max-w-2xl h-auto rounded border border-slate-200 shadow-sm" />
+                            ) : isOtherFile ? (
+                              <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400">
+                                <FileText className="w-8 h-8 mb-2 opacity-50" />
+                                <p className="text-xs italic">Document attached. Click "Download Answer Sheet" above to view.</p>
+                              </div>
+                            ) : (
+                              <p className="font-mono text-[11px] text-slate-600 whitespace-pre-wrap leading-relaxed break-all">
+                                {safeContent}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -530,6 +584,7 @@ export default function TeacherDashboard() {
                             </div>
                           </form>
                         ) : (
+                          // Show 'Assess' button only if it's not graded
                           sub.status !== 'GRADED' && (
                             <button
                               onClick={() => {
@@ -900,7 +955,7 @@ export default function TeacherDashboard() {
           </div>
         )}
 
-        {/* ✅ CHAT PORTAL UPGRADE: Combined Internal Website Chat + WhatsApp Sync */}
+        {/* Communication Portal */}
         {activeSubTab === 'communications' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
             <div>
@@ -1230,7 +1285,6 @@ export default function TeacherDashboard() {
                               Excused
                             </button>
 
-                            {/* Remarks input inline */}
                             <input
                               type="text"
                               placeholder="Add remarks..."
