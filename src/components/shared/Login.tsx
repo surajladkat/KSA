@@ -43,18 +43,18 @@ const SLIDER_IMAGES = [
   }
 ];
 
-// Form animation variants
+// Cascading Form Animations
 const formContainer = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
   }
 };
 
 const formItem = {
   hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 22 } }
 };
 
 export default function Login() {
@@ -82,7 +82,7 @@ export default function Login() {
     enter: (dir: number) => ({
       x: dir > 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 1.05
+      scale: 1.02
     }),
     center: {
       zIndex: 1,
@@ -117,186 +117,172 @@ export default function Login() {
   };
 
   return (
-    // OUTER VIEWPORT: Locked to h-screen and overflow-hidden to kill browser scrollbars
-    <div className="flex h-screen w-full bg-slate-900 font-sans items-center justify-center p-4 lg:p-6 relative overflow-hidden selection:bg-blue-500/30">
-      
-      {/* Mobile Full-Screen Background */}
-      <div className="absolute inset-0 lg:hidden z-0">
-        <img 
-          src={SLIDER_IMAGES[imageIndex].url} 
-          className="w-full h-full object-cover opacity-40 transition-opacity duration-1000" 
-          alt="mobile-bg" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40 backdrop-blur-[2px]" />
+    // 🌍 MAIN CONTAINER: 100dvh specifically to handle mobile browsers properly without scrollbars
+    <div className="w-full h-[100dvh] flex flex-col lg:flex-row bg-slate-100 p-3 sm:p-4 lg:p-5 gap-3 lg:gap-4 overflow-hidden font-sans relative selection:bg-blue-500/30">
+
+      {/* 📸 CONTAINER ONE: Curved Edge Image Slider (Top on Mobile, Left on Desktop) */}
+      <div className="w-full h-[35%] sm:h-[40%] lg:h-full lg:w-[55%] xl:w-[58%] flex relative overflow-hidden bg-slate-950 rounded-[1.5rem] lg:rounded-[2.5rem] isolation-isolate z-20 shadow-xl lg:shadow-2xl shrink-0">
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={page}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ x: { type: "spring", stiffness: 180, damping: 24 }, opacity: { duration: 0.3 } }}
+            className="absolute inset-0 w-full h-full rounded-[1.5rem] lg:rounded-[2.5rem] overflow-hidden"
+          >
+            <img 
+              src={SLIDER_IMAGES[imageIndex].url} 
+              alt={SLIDER_IMAGES[imageIndex].title} 
+              className="w-full h-full object-cover opacity-85"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 lg:via-slate-900/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 lg:from-slate-950/30 to-transparent" />
+            
+            {/* Adjusted Mobile Text Positioning */}
+            <div className="absolute bottom-4 left-5 right-20 lg:bottom-16 lg:left-16 lg:right-16 text-left text-white z-10 space-y-1.5 lg:space-y-4">
+              <motion.span 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="text-[9px] lg:text-xs bg-blue-600 text-white font-bold px-3 py-1.5 lg:px-4 lg:py-2 rounded-full uppercase tracking-wider font-mono shadow-lg inline-block"
+              >
+                {SLIDER_IMAGES[imageIndex].title}
+              </motion.span>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                className="text-xs sm:text-sm lg:text-xl text-slate-200 leading-snug lg:leading-relaxed max-w-2xl font-medium drop-shadow-md line-clamp-2 lg:line-clamp-none"
+              >
+                {SLIDER_IMAGES[imageIndex].desc}
+              </motion.p>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Adjusted Mobile Nav Buttons Positioning */}
+        <div className="absolute bottom-4 right-4 lg:bottom-12 lg:right-12 z-30 flex gap-1.5 lg:gap-3">
+          <button 
+            type="button" onClick={() => paginate(-1)} 
+            className="p-2 lg:p-3 rounded-full bg-white/10 hover:bg-blue-600 text-white backdrop-blur-md transition-all cursor-pointer shadow-lg border border-white/10 hover:border-blue-500"
+          >
+            <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
+          <button 
+            type="button" onClick={() => paginate(1)} 
+            className="p-2 lg:p-3 rounded-full bg-white/10 hover:bg-blue-600 text-white backdrop-blur-md transition-all cursor-pointer shadow-lg border border-white/10 hover:border-blue-500"
+          >
+            <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* MASTER FLOATING CARD: Scaled up to 96vw and 94vh to maximize screen space */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-[96vw] max-w-[1536px] h-[94vh] max-h-[950px] flex flex-col lg:flex-row bg-transparent lg:bg-white rounded-3xl lg:rounded-[2.5rem] overflow-hidden lg:shadow-2xl relative z-10"
-      >
+      {/* 🔐 CONTAINER TWO: Form Area (Bottom on Mobile, Right on Desktop) */}
+      <div className="w-full flex-1 lg:h-full lg:w-[45%] xl:w-[42%] bg-white rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col justify-center items-center p-5 sm:p-8 lg:p-16 relative z-10 overflow-hidden shadow-2xl">
         
-        {/* ⬅️ LEFT SIDE: Desktop Photo Slider */}
-        <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative overflow-hidden bg-slate-950">
-          <AnimatePresence initial={false} custom={direction} mode="popLayout">
-            <motion.div
-              key={page}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ x: { type: "spring", stiffness: 200, damping: 25 }, opacity: { duration: 0.3 } }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <img 
-                src={SLIDER_IMAGES[imageIndex].url} 
-                alt={SLIDER_IMAGES[imageIndex].title} 
-                className="w-full h-full object-cover opacity-85"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/20 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 to-transparent" />
-              
-              <div className="absolute bottom-16 left-12 right-12 text-left text-white z-10 space-y-4">
-                <motion.span 
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                  className="text-xs bg-blue-600 text-white font-bold px-4 py-2 rounded-full uppercase tracking-wider font-mono shadow-lg"
-                >
-                  {SLIDER_IMAGES[imageIndex].title}
-                </motion.span>
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                  className="text-xl text-slate-200 leading-relaxed max-w-2xl font-medium drop-shadow-md"
-                >
-                  {SLIDER_IMAGES[imageIndex].desc}
-                </motion.p>
-              </div>
-            </motion.div>
+        <motion.div 
+          variants={formContainer}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-md space-y-4 lg:space-y-7"
+        >
+          
+          <motion.div variants={formItem} className="text-left space-y-1.5 lg:space-y-3">
+            <span className="text-[9px] lg:text-[10px] bg-blue-50 text-blue-700 font-extrabold px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full uppercase tracking-wider font-mono border border-blue-100 inline-block shadow-sm">
+              Private Academy Hub
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              Welcome Back
+            </h2>
+            <p className="text-xs lg:text-sm text-slate-500 leading-relaxed font-medium hidden sm:block">
+              Securely login to access course materials, track student performance, and manage academy ledgers.
+            </p>
+          </motion.div>
+
+          {/* Feature Badges - Scaled slightly for mobile */}
+          <motion.div variants={formItem} className="grid grid-cols-2 gap-2 lg:gap-3 pt-1">
+            <div className="p-2 lg:p-3 bg-slate-50 border border-slate-100 rounded-xl flex gap-2 lg:gap-2.5 items-center shadow-sm">
+              <div className="bg-blue-100 p-1 lg:p-1.5 rounded-lg"><ShieldCheck className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-700" /></div>
+              <p className="text-[10px] lg:text-xs text-slate-700 font-bold leading-tight">256-bit Encrypted</p>
+            </div>
+            <div className="p-2 lg:p-3 bg-slate-50 border border-slate-100 rounded-xl flex gap-2 lg:gap-2.5 items-center shadow-sm">
+              <div className="bg-emerald-100 p-1 lg:p-1.5 rounded-lg"><Users className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-emerald-700" /></div>
+              <p className="text-[10px] lg:text-xs text-slate-700 font-bold leading-tight">Role-Based Access</p>
+            </div>
+          </motion.div>
+
+          {/* Error Banner */}
+          <AnimatePresence>
+            {errorMsg && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-red-50 border border-red-200 rounded-xl p-3 lg:p-3.5 text-red-700 text-xs lg:text-sm flex gap-2.5 items-center shadow-sm overflow-hidden"
+              >
+                <ShieldAlert className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0 text-red-600" />
+                <p className="font-semibold leading-none">{errorMsg}</p>
+              </motion.div>
+            )}
           </AnimatePresence>
 
-          <div className="absolute bottom-12 right-12 z-20 flex gap-3">
-            <button 
-              type="button" onClick={() => paginate(-1)} 
-              className="p-3 rounded-full bg-white/10 hover:bg-blue-600 text-white backdrop-blur-md transition-all cursor-pointer shadow-lg border border-white/10 hover:border-blue-500"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button 
-              type="button" onClick={() => paginate(1)} 
-              className="p-3 rounded-full bg-white/10 hover:bg-blue-600 text-white backdrop-blur-md transition-all cursor-pointer shadow-lg border border-white/10 hover:border-blue-500"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* ➡️ RIGHT SIDE: Login Form Area */}
-        {/* Added internal overflow-y-auto with hidden scrollbars just in case it's viewed on a short landscape screen */}
-        <div className="w-full lg:w-[45%] xl:w-[40%] h-full flex flex-col justify-center items-center p-6 sm:p-12 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          
-          <motion.div 
-            variants={formContainer}
-            initial="hidden"
-            animate="show"
-            className="w-full max-w-md bg-white/95 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none rounded-3xl lg:rounded-none shadow-2xl lg:shadow-none p-8 sm:p-10 lg:p-6 border border-white/20 lg:border-none space-y-8"
-          >
-            
-            <motion.div variants={formItem} className="text-left space-y-3">
-              <span className="text-[10px] bg-blue-50 text-blue-700 font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider font-mono border border-blue-100 inline-block shadow-sm">
-                Private Academy Hub
-              </span>
-              <h2 className="text-4xl xl:text-5xl font-black text-slate-900 tracking-tight font-sans leading-tight">
-                Welcome Back
-              </h2>
-              <p className="text-sm xl:text-base text-slate-500 leading-relaxed font-medium">
-                Securely login to access course materials, track student performance, and manage academy ledgers.
-              </p>
-            </motion.div>
-
-            <motion.div variants={formItem} className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3 bg-slate-50 lg:bg-slate-50/50 border border-slate-100 rounded-xl flex gap-2.5 items-center shadow-sm">
-                <div className="bg-blue-100 p-1.5 rounded-lg"><ShieldCheck className="w-5 h-5 text-blue-700" /></div>
-                <p className="text-xs xl:text-sm text-slate-700 font-bold">256-bit Encrypted</p>
+          {/* Form Fields */}
+          <motion.form variants={formItem} onSubmit={handleSubmit} className="space-y-3.5 lg:space-y-5">
+            <div className="space-y-1.5 lg:space-y-2">
+              <label className="text-[10px] lg:text-xs text-slate-700 font-extrabold uppercase tracking-wide">Authorized ID</label>
+              <div className="relative group">
+                <User className="absolute left-3.5 lg:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <input 
+                  type="text"
+                  required
+                  disabled={isLoading}
+                  placeholder="e.g. admin, teacher"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full text-xs lg:text-sm font-mono border border-slate-200 rounded-xl py-3 lg:py-3.5 pl-10 lg:pl-11 pr-4 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400"
+                />
               </div>
-              <div className="p-3 bg-slate-50 lg:bg-slate-50/50 border border-slate-100 rounded-xl flex gap-2.5 items-center shadow-sm">
-                <div className="bg-emerald-100 p-1.5 rounded-lg"><Users className="w-5 h-5 text-emerald-700" /></div>
-                <p className="text-xs xl:text-sm text-slate-700 font-bold">Role-Based Access</p>
-              </div>
-            </motion.div>
+            </div>
 
-            <AnimatePresence>
-              {errorMsg && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm flex gap-3 items-start shadow-sm overflow-hidden"
-                >
-                  <ShieldAlert className="w-5 h-5 flex-shrink-0 text-red-600 mt-0.5" />
-                  <p className="font-semibold leading-relaxed">{errorMsg}</p>
-                </motion.div>
+            <div className="space-y-1.5 lg:space-y-2">
+              <label className="text-[10px] lg:text-xs text-slate-700 font-extrabold uppercase tracking-wide">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3.5 lg:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <input 
+                  type="password"
+                  required
+                  disabled={isLoading}
+                  placeholder="Enter secure password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full text-xs lg:text-sm font-mono border border-slate-200 rounded-xl py-3 lg:py-3.5 pl-10 lg:pl-11 pr-4 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <motion.button
+              type="submit"
+              disabled={isLoading}
+              whileHover={!isLoading ? { scale: 1.01 } : {}}
+              whileTap={!isLoading ? { scale: 0.99 } : {}}
+              className="w-full py-3 lg:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs lg:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/25 mt-1 lg:mt-2 disabled:bg-blue-500 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 lg:w-5 lg:h-5 animate-spin" />
+                  Authenticating...
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4 lg:w-5 lg:h-5" />
+                  Enter Academic Portal
+                </>
               )}
-            </AnimatePresence>
+            </motion.button>
+          </motion.form>
 
-            <motion.form variants={formItem} onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2.5">
-                <label className="text-xs text-slate-700 font-extrabold uppercase tracking-wide">Authorized ID</label>
-                <div className="relative group">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input 
-                    type="text"
-                    required
-                    disabled={isLoading}
-                    placeholder="e.g. admin, teacher"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full text-base font-mono border border-slate-200 rounded-xl py-4 pl-12 pr-4 bg-slate-50 lg:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400 disabled:opacity-50"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <label className="text-xs text-slate-700 font-extrabold uppercase tracking-wide">Password</label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input 
-                    type="password"
-                    required
-                    disabled={isLoading}
-                    placeholder="Enter secure password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full text-base font-mono border border-slate-200 rounded-xl py-4 pl-12 pr-4 bg-slate-50 lg:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400 disabled:opacity-50"
-                  />
-                </div>
-              </div>
-
-              <motion.button
-                type="submit"
-                disabled={isLoading}
-                whileHover={!isLoading ? { scale: 1.01 } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/25 mt-6 disabled:bg-blue-500 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Authenticating...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="w-5 h-5" />
-                    Enter Academic Portal
-                  </>
-                )}
-              </motion.button>
-            </motion.form>
-
-          </motion.div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
