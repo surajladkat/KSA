@@ -6,9 +6,35 @@
 import React, { useState } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { decryptData } from '../../cryptoUtils';
-import { BookOpen, Calendar, CheckCircle2, AlertCircle, Play, Download, Lock, Unlock, FileText, Send, Award, Users, GraduationCap, Upload } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle2, AlertCircle, Play, Download, Lock, Unlock, FileText, Send, Award, Users, GraduationCap, Upload, Link as LinkIcon } from 'lucide-react';
 import FacultyDirectory from '../shared/FacultyDirectory';
 import { motion } from 'motion/react';
+
+// ✅ HELPER: Get correct MIME type based on file extension
+const getMimeType = (fileName: string): string => {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg':
+    case 'jpeg': return 'image/jpeg';
+    case 'pdf': return 'application/pdf';
+    case 'doc':
+    case 'docx': return 'application/msword';
+    default: return 'text/plain'; // fallback
+  }
+};
+
+// ✅ HELPER: Convert Base64/DataURL to Blob for correct downloading
+const dataURItoBlob = (dataURI: string): Blob => {
+  const byteString = atob(dataURI.split(',')[1]);
+  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+};
 
 export default function StudentDashboard() {
   const {
@@ -55,7 +81,7 @@ export default function StudentDashboard() {
       const content = e.target?.result as string || '';
       setSubmissionBoxText(content);
     };
-   reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // Saved as proper data URL
   };
 
   const handleSubmitHomework = (e: React.FormEvent) => {
@@ -73,10 +99,19 @@ export default function StudentDashboard() {
     setDecryptedMaterialId(materialId === decryptedMaterialId ? null : materialId);
   };
 
+  // ✅ PERFECT DOWNLOAD FIX FOR STUDENTS
   const handleDownloadFile = (fileName: string, encryptedContent: string) => {
     try {
       const decrypted = decryptData(encryptedContent, 'SCHOOL_SECRET_KEY');
-      const blob = new Blob([decrypted], { type: 'text/plain;charset=utf-8' });
+      let blob: Blob;
+
+      if (decrypted.startsWith('data:')) {
+        blob = dataURItoBlob(decrypted);
+      } else {
+        const mimeType = getMimeType(fileName);
+        blob = new Blob([decrypted], { type: `${mimeType};charset=utf-8` });
+      }
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -87,6 +122,7 @@ export default function StudentDashboard() {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Failed to download file', e);
+      alert('There was an error decoding this file.');
     }
   };
 
@@ -524,10 +560,19 @@ export default function StudentDashboard() {
                         </div>
                         <h3 className="text-xs font-bold text-slate-800 font-sans">{mat.title}</h3>
                         <p className="text-[11px] text-slate-500 leading-normal font-sans">{mat.description}</p>
+                        
+                        {/* ✅ LINK vs FILE DETECTION ICON */}
+                        <p className="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-1">
+                          {mat.link ? (
+                            <><LinkIcon className="w-3 h-3 text-blue-500" /> Web Reference Link</>
+                          ) : (
+                            <><FileText className="w-3 h-3 text-slate-400" /> {mat.fileName}</>
+                          )}
+                        </p>
                       </div>
 
                       {/* File preview */}
-                      {isOpened && (
+                      {isOpened && !mat.link && (
                         <div className="bg-white border border-slate-200 rounded-lg p-3 mt-2 space-y-1">
                           <span className="text-[9px] font-bold text-emerald-750 text-emerald-700 uppercase flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded w-fit font-mono">
                             <BookOpen className="w-2.5 h-2.5" /> Course Handbook View
@@ -539,24 +584,38 @@ export default function StudentDashboard() {
                       )}
 
                       <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                        <button
-                          onClick={() => handleDownloadAndDecrypt(mat.id)}
-                          className="flex-1 py-2 border border-blue-100 hover:bg-blue-50 text-blue-700 font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
-                        >
-                          {isOpened ? (
-                            <> Close Document View </>
-                          ) : (
-                            <> <BookOpen className="w-3.5 h-3.5 text-blue-600" /> Open Reference Document </>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDownloadFile(mat.fileName, mat.fileContent)}
-                          className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
-                          title="Download Decrypted Handout File"
-                        >
-                          <Download className="w-3.5 h-3.5 text-white" />
-                          Download File
-                        </button>
+                        {/* ✅ CONDITIONAL RENDER: LINK OR FILE BUTTONS */}
+                        {mat.link ? (
+                          <a
+                            href={mat.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 py-2 border border-blue-100 hover:bg-blue-50 text-blue-700 font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
+                          >
+                            <LinkIcon className="w-3.5 h-3.5 text-blue-600" /> Open Reference Link
+                          </a>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleDownloadAndDecrypt(mat.id)}
+                              className="flex-1 py-2 border border-blue-100 hover:bg-blue-50 text-blue-700 font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            >
+                              {isOpened ? (
+                                <> Close Document View </>
+                              ) : (
+                                <> <BookOpen className="w-3.5 h-3.5 text-blue-600" /> Open Reference Document </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleDownloadFile(mat.fileName, mat.fileContent)}
+                              className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"
+                              title="Download Decrypted Handout File"
+                            >
+                              <Download className="w-3.5 h-3.5 text-white" />
+                              Download File
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -600,7 +659,7 @@ export default function StudentDashboard() {
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-slate-705 text-slate-700 uppercase tracking-wide font-mono">Tasks Evaluation Log</h3>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto font-sans">                <table className="w-full text-xs text-left text-slate-500">
+              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto font-sans">               <table className="w-full text-xs text-left text-slate-500">
                 <thead className="bg-slate-55 bg-slate-50 border-b border-slate-205 border-slate-200 text-[10px] text-slate-400 font-extrabold uppercase font-mono">
                   <tr>
                     <th className="py-3 px-4">Subject</th>
