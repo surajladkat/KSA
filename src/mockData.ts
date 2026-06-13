@@ -21,7 +21,7 @@ import { encryptData } from './cryptoUtils';
 export const DEFAULT_ADMIN: AdminUser = {
   id: 'usr-admin-1',
   username: 'admin',
-  name: 'Director Sarah Jenkins',
+  name: 'Director',
   role: 'ADMIN',
   createdAt: '2026-01-10T08:00:00Z',
 };

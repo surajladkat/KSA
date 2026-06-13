@@ -47,7 +47,7 @@ export default function Header() {
           <ShieldCheck className="w-5 h-5 text-white" />
         </motion.div>
         <div>
-          <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">Private Academy Portal</h1>
+          <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">SHREE SAMARTHA CLASSES AND LIBRARY</h1>
           <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-mono">Academic Session 2026</p>
         </div>
       </div>
