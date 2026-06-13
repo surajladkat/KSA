@@ -51,6 +51,7 @@ export default function TeacherDashboard() {
     uploadStudyMaterial,
     deleteStudyMaterial,
     createAssignment,
+    deleteAssignment,
     gradeSubmission,
     submitDailyAttendance,
     deleteSubmission // ✅ NEW: Added delete function from context
@@ -64,6 +65,7 @@ export default function TeacherDashboard() {
   const [attClass, setAttClass] = useState<ClassGrade>(teacher?.classes?.[0] || '9th');
   const [attSubject, setAttSubject] = useState<string>(teacher?.subjects?.[0] || '');
   const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0]);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   
   const [attRecords, setAttRecords] = useState<Record<string, { status: AttendanceStatus; remarks: string }>>({});
 
@@ -105,6 +107,7 @@ export default function TeacherDashboard() {
   // Grading states
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
   const [deletingSubId, setDeletingSubId] = useState<string | null>(null); // ✅ NEW: State for deleting submission
+  const [deletingAsgId, setDeletingAsgId] = useState<string | null>(null); // State for deleting assignment
   const [inputGrade, setInputGrade] = useState('');
   const [inputFeedback, setInputFeedback] = useState('');
 
@@ -211,9 +214,12 @@ export default function TeacherDashboard() {
     setUploadedFileSize(null);
   };
 
-  const handleCreateAssignment = (e: React.FormEvent) => {
+ const handleCreateAssignment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!asgTitle || !asgDesc || !asgDueDate) return;
+    if (!asgTitle || !asgDesc || !asgDueDate) {
+      alert("Please fill in all details.");
+      return;
+    }
 
     createAssignment({
       title: asgTitle,
@@ -222,6 +228,12 @@ export default function TeacherDashboard() {
       subject: asgSubject,
       dueDate: new Date(asgDueDate).toISOString()
     });
+
+    // Set the UI success message
+    setSuccessMsg(`Assignment "${asgTitle}" successfully assigned to ${asgClass}!`);
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setSuccessMsg(null), 3000);
 
     setAsgTitle('');
     setAsgDesc('');
@@ -898,7 +910,17 @@ export default function TeacherDashboard() {
               </h2>
               <p className="text-xs text-slate-400 mt-1 font-sans">Post a new assignment. Targeted students and their parents will be notified instantly via system-wide sync.</p>
             </div>
-
+               {/* Feedback Notification UI */}
+{successMsg && (
+  <motion.div 
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2 text-emerald-800 text-xs font-bold"
+  >
+    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+    {successMsg}
+  </motion.div>
+)}
             <form onSubmit={handleCreateAssignment} className="space-y-4 font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
@@ -981,6 +1003,85 @@ export default function TeacherDashboard() {
                 Assign Homework and Alert Student-Parent Network
               </button>
             </form>
+
+            {/* Posted Assignments List */}
+            <div className="border-t border-slate-100 pt-6 space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 font-sans flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  My Posted Assignments
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5 font-sans">Assignments you have created. You can delete them here.</p>
+              </div>
+
+              {assignments.filter(a => a.uploadedBy === currentUser?.id).length === 0 ? (
+                <p className="text-xs italic text-slate-400 py-4 text-center font-sans">No assignments posted yet. Use the form above to create one.</p>
+              ) : (
+                <div className="space-y-3">
+                  {assignments.filter(a => a.uploadedBy === currentUser?.id).map(asg => {
+                    const subCount = submissions.filter(s => s.assignmentId === asg.id).length;
+                    return (
+                      <div key={asg.id} className="border border-slate-200 rounded-xl p-4 bg-slate-50/40 space-y-2 hover:border-slate-300 transition-colors">
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="text-[9px] font-bold font-mono bg-blue-50 border border-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase">
+                                {asg.subject}
+                              </span>
+                              <span className="text-[9px] font-bold font-mono bg-slate-100 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded">
+                                Class {asg.classGrade}
+                              </span>
+                              <span className="text-[9px] font-mono text-slate-400 bg-amber-50 border border-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
+                                {subCount} submission{subCount !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <p className="text-xs font-bold text-slate-800 font-sans truncate">{asg.title}</p>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              Due: {new Date(asg.dueDate).toLocaleString()} • Posted {new Date(asg.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+
+                          {deletingAsgId === asg.id ? (
+                            <div className="flex flex-col gap-1.5 shrink-0">
+                              <span className="text-[10px] font-bold text-red-700 text-center font-mono">Confirm delete?</span>
+                              <div className="flex gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    await deleteAssignment(asg.id);
+                                    setDeletingAsgId(null);
+                                  }}
+                                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded transition cursor-pointer"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDeletingAsgId(null)}
+                                  className="px-3 py-1 bg-white border border-slate-300 text-slate-600 text-[10px] font-bold rounded transition cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setDeletingAsgId(asg.id)}
+                              className="p-1.5 bg-white hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-400 hover:text-red-600 rounded flex items-center justify-center transition cursor-pointer shrink-0"
+                              title="Delete assignment"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-sans leading-relaxed">{asg.description}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
