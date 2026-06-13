@@ -56,7 +56,7 @@ import {
 } from '../firebase/firestoreService';
 import { seedFirestoreIfEmpty } from '../firebase/seedFirestore';
 
-// ─── Context interface (unchanged from localStorage version) ──────────────────
+// ─── Context interface ────────────────────────────────────────────────────────
 
 interface SchoolContextType {
   currentUser: User | null;
@@ -100,6 +100,7 @@ interface SchoolContextType {
   updateStudentFee: (studentId: string, amountPaid: number) => Promise<void>;
   deleteStudent: (studentId: string) => Promise<void>;
   deleteTeacher: (teacherId: string) => Promise<void>;
+  clearAllLogs: () => Promise<void>; // ✅ DEFINED HERE FOR TYPESCRIPT
 
   // Teacher
   uploadStudyMaterial: (material: Omit<StudyMaterial, 'id' | 'uploadedBy' | 'uploadedAt'>) => Promise<void>;
@@ -135,7 +136,6 @@ const SchoolContext = createContext<SchoolContextType | undefined>(undefined);
 export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading]           = useState(true);
   const [currentUser, setCurrentUser]       = useState<User | null>(() => {
-    // Persist session in sessionStorage (not localStorage) so it clears on tab close
     try {
       const saved = sessionStorage.getItem('school_current_user');
       return saved ? JSON.parse(saved) : null;
@@ -184,7 +184,6 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       if (cancelled) return;
 
-      // Register onSnapshot listeners — returns unsubscribe functions
       const unsubs = [
         subscribeTeachers(data       => !cancelled && setTeachers(data)),
         subscribeStudents(data       => !cancelled && setStudents(data)),
@@ -211,7 +210,6 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, []);
 
-  // ── Notification listener depends on currentUser ──────────────────────────────
   useEffect(() => {
     if (!currentUser) { setNotifications([]); return; }
     const unsub = subscribeNotifications(currentUser.id, currentUser.role, data =>
@@ -223,6 +221,9 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // ─── Helper: log activity ────────────────────────────────────────────────────
   const logActivity = useCallback(
     async (userId: string, userName: string, role: Role, action: string) => {
+      const expireDate = new Date();
+      expireDate.setDate(expireDate.getDate() + 30);
+      
       const log: ActivityLog = {
         id: generateId('LOG'),
         userId,
@@ -231,6 +232,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         action,
         timestamp: new Date().toISOString(),
         ipAddress: `192.168.${Math.floor(10 + Math.random() * 20)}.${Math.floor(2 + Math.random() * 250)}`,
+        expireAt: expireDate,
       };
       await setDocument(COLLECTIONS.ACTIVITY_LOGS, log.id, log);
     },
@@ -259,7 +261,6 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     username: string,
     password: string,
   ): Promise<{ success: boolean; error?: string }> => {
-    // Admin check (singleton)
     if (username === DEFAULT_ADMIN.username && checkPasswordMatch(username, password)) {
       setCurrentUser(DEFAULT_ADMIN);
       await logActivity(DEFAULT_ADMIN.id, DEFAULT_ADMIN.name, 'ADMIN', 'Admin logged into control panel');
@@ -418,26 +419,24 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // ─── Admin: delete student ────────────────────────────────────────────────────
   const deleteStudent = async (studentId: string) => {
-  if (!currentUser || currentUser.role !== 'ADMIN') return;
-  
-  const target = students.find(s => s.id === studentId);
-  if (!target) return;
+    if (!currentUser || currentUser.role !== 'ADMIN') return;
+    
+    const target = students.find(s => s.id === studentId);
+    if (!target) return;
 
-  // TRAP 2 BYPASS: Use the student's own record to find the parent ID.
-  // If target.parentId is missing, fallback to searching the parents array.
-  const parentIdToDelete = target.parentId || parents.find(p => p.childId === studentId)?.id;
+    const parentIdToDelete = target.parentId || parents.find(p => p.childId === studentId)?.id;
 
-  await Promise.all([
-    deleteDocument(COLLECTIONS.STUDENTS, studentId),
-    parentIdToDelete ? deleteDocument(COLLECTIONS.PARENTS, parentIdToDelete) : Promise.resolve(),
-  ]);
+    await Promise.all([
+      deleteDocument(COLLECTIONS.STUDENTS, studentId),
+      parentIdToDelete ? deleteDocument(COLLECTIONS.PARENTS, parentIdToDelete) : Promise.resolve(),
+    ]);
 
-  await logActivity(
-    currentUser.id, currentUser.name, 'ADMIN',
-    `Expelled student: ${target.name} (${target.classGrade}) and revoked parent access`,
-  );
-  await addToastNotification(currentUser.id, 'Student Deleted', `${target.name} and linked parent removed.`, 'INFO');
-};
+    await logActivity(
+      currentUser.id, currentUser.name, 'ADMIN',
+      `Expelled student: ${target.name} (${target.classGrade}) and revoked parent access`,
+    );
+    await addToastNotification(currentUser.id, 'Student Deleted', `${target.name} and linked parent removed.`, 'INFO');
+  };
 
   // ─── Admin: delete teacher ────────────────────────────────────────────────────
   const deleteTeacher = async (teacherId: string) => {
@@ -448,6 +447,21 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     await deleteDocument(COLLECTIONS.TEACHERS, teacherId);
     await logActivity(currentUser.id, currentUser.name, 'ADMIN', `Dismissed teacher: ${target.name}`);
     await addToastNotification(currentUser.id, 'Teacher Deleted', `${target.name} dismissed and removed.`, 'INFO');
+  };
+
+  // ✅ SMART & SAFE LOG CLEARING (No missing imports)
+  const clearAllLogs = async () => {
+    if (!currentUser || currentUser.role !== 'ADMIN') return;
+    try {
+      const deletePromises = activityLogs.map(log => deleteDocument(COLLECTIONS.ACTIVITY_LOGS, log.id));
+      await Promise.all(deletePromises);
+      
+      setActivityLogs([]);
+      alert("All system logs have been successfully cleared from the database!");
+    } catch (error) {
+      console.error("Error clearing logs: ", error);
+      alert("Failed to clear logs.");
+    }
   };
 
   // ─── Teacher: upload study material ─────────────────────────────────────────
@@ -548,7 +562,6 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const assignment = assignments.find(a => a.id === assignmentId);
     if (!assignment) return;
 
-    // Delete previous submission for same assignment+student if exists
     const existing = submissions.find(
       s => s.assignmentId === assignmentId && s.studentId === studentUser.id,
     );
@@ -621,7 +634,6 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!currentUser || currentUser.role !== 'TEACHER') return;
     const teacherUser = currentUser as TeacherUser;
 
-    // Delete existing records for same classGrade + subject + date (upsert behaviour)
     const existing = attendance.filter(
       r => r.classGrade === data.classGrade && r.subject === data.subject && r.date === data.date,
     );
@@ -715,6 +727,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateStudentFee,
         deleteStudent,
         deleteTeacher,
+        clearAllLogs,
         uploadStudyMaterial,
         deleteStudyMaterial,
         createAssignment,

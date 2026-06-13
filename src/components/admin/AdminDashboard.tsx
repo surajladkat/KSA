@@ -71,7 +71,8 @@ export default function AdminDashboard() {
     addTimetableEntry,
     deleteTimetableEntry,
     deleteStudent,
-    deleteTeacher
+    deleteTeacher,
+    clearAllLogs // ✅ NEW: Added clear logs function from context
   } = useSchool();
 
   // Active Main Tab
@@ -1012,13 +1013,29 @@ export default function AdminDashboard() {
                 <p className="text-xs text-slate-400 mt-1">Verified audit records containing administrator admissions, fee receipts, and faculty additions.</p>
               </div>
 
-              <input
-                type="text"
-                placeholder="Search audit actions..."
-                value={logSearch}
-                onChange={e => setLogSearch(e.target.value)}
-                className="text-xs font-sans w-56 border border-slate-200 rounded-lg py-2 px-3 focus:outline-blue-500 bg-slate-50/50"
-              />
+              {/* ✅ NEW: Smart Clear Logs Feature */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="Search audit actions..."
+                  value={logSearch}
+                  onChange={e => setLogSearch(e.target.value)}
+                  className="text-xs font-sans w-56 border border-slate-200 rounded-lg py-2 px-3 focus:outline-blue-500 bg-slate-50/50"
+                />
+                
+                {activityLogs.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to completely DELETE ALL system logs? This action cannot be undone.")) {
+                        if (clearAllLogs) clearAllLogs();
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-650 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" /> Clear All Logs
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="border border-slate-200 rounded-xl overflow-x-auto">
@@ -1033,38 +1050,43 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {activityLogs
-                    .filter(log => 
-                      log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
-                      log.userName.toLowerCase().includes(logSearch.toLowerCase())
-                    )
-                    .slice(0, 15)
-                    .map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
-                        <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
-                          {new Date(log.timestamp).toLocaleTimeString()}
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
-                          {log.userName}
-                        </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${
-                            log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
-                            log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
-                            log.userRole === 'STUDENT' ? 'bg-slate-50 text-slate-600' :
-                            'bg-amber-50 text-amber-700'
-                          }`}>
-                            {log.userRole}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-600 font-medium">
-                          {log.action}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
-                          {log.ipAddress}
-                        </td>
-                      </tr>
-                    ))}
+                  {activityLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center italic text-slate-400">No logs found in the system database.</td>
+                    </tr>
+                  ) : (
+                    activityLogs
+                      .filter(log => 
+                        log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
+                        log.userName.toLowerCase().includes(logSearch.toLowerCase())
+                      )
+                      .map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/20 transition-colors">
+                          <td className="py-3.5 px-4 text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">
+                            {log.userName.replace('Director Sarah Jenkins', 'Director')}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider ${
+                              log.userRole === 'ADMIN' ? 'bg-slate-100 text-slate-700' :
+                              log.userRole === 'TEACHER' ? 'bg-blue-50 text-blue-700' :
+                              log.userRole === 'STUDENT' ? 'bg-slate-50 text-slate-600' :
+                              'bg-amber-50 text-amber-700'
+                            }`}>
+                              {log.userRole}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-600 font-medium">
+                            {log.action}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-400 whitespace-nowrap">
+                            {log.ipAddress}
+                          </td>
+                        </tr>
+                      ))
+                  )}
                 </tbody>
               </table>
             </div>
