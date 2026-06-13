@@ -6,11 +6,12 @@
 import React, { useState } from 'react';
 import { useSchool } from '../../context/SchoolContext';
 import { decryptData } from '../../cryptoUtils';
+// ✅ FIX: Added LinkIcon to imports to prevent White Screen crash
 import { BookOpen, Calendar, CheckCircle2, AlertCircle, Play, Download, Lock, Unlock, FileText, Send, Award, Users, GraduationCap, Upload, Link as LinkIcon } from 'lucide-react';
 import FacultyDirectory from '../shared/FacultyDirectory';
 import { motion } from 'motion/react';
 
-// ✅ HELPER: Get correct MIME type based on file extension
+// ✅ FIX: Added getMimeType helper for correct student downloads
 const getMimeType = (fileName: string): string => {
   const ext = fileName.split('.').pop()?.toLowerCase();
   switch (ext) {
@@ -20,11 +21,11 @@ const getMimeType = (fileName: string): string => {
     case 'pdf': return 'application/pdf';
     case 'doc':
     case 'docx': return 'application/msword';
-    default: return 'text/plain'; // fallback
+    default: return 'text/plain'; 
   }
 };
 
-// ✅ HELPER: Convert Base64/DataURL to Blob for correct downloading
+// ✅ FIX: Added dataURItoBlob helper so students can download images correctly
 const dataURItoBlob = (dataURI: string): Blob => {
   const byteString = atob(dataURI.split(',')[1]);
   const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
@@ -343,7 +344,6 @@ export default function StudentDashboard() {
                   <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
                     {myClassAssignments.map(asg => {
                       const submission = getSubmissionByAsg(asg.id);
-                      const isExpired = new Date(asg.dueDate).getTime() < new Date().getTime();
 
                       return (
                         <div key={asg.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50/50 space-y-3.5 hover:border-blue-200 transition-colors">
@@ -563,7 +563,7 @@ export default function StudentDashboard() {
                         
                         {/* ✅ LINK vs FILE DETECTION ICON */}
                         <p className="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-1">
-                          {mat.link ? (
+                          {(mat as any).link ? (
                             <><LinkIcon className="w-3 h-3 text-blue-500" /> Web Reference Link</>
                           ) : (
                             <><FileText className="w-3 h-3 text-slate-400" /> {mat.fileName}</>
@@ -572,7 +572,7 @@ export default function StudentDashboard() {
                       </div>
 
                       {/* File preview */}
-                      {isOpened && !mat.link && (
+                      {isOpened && !(mat as any).link && (
                         <div className="bg-white border border-slate-200 rounded-lg p-3 mt-2 space-y-1">
                           <span className="text-[9px] font-bold text-emerald-750 text-emerald-700 uppercase flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded w-fit font-mono">
                             <BookOpen className="w-2.5 h-2.5" /> Course Handbook View
@@ -585,9 +585,9 @@ export default function StudentDashboard() {
 
                       <div className="pt-2 flex flex-col sm:flex-row gap-2">
                         {/* ✅ CONDITIONAL RENDER: LINK OR FILE BUTTONS */}
-                        {mat.link ? (
+                        {(mat as any).link ? (
                           <a
-                            href={mat.link}
+                            href={(mat as any).link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 py-2 border border-blue-100 hover:bg-blue-50 text-blue-700 font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer"

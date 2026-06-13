@@ -52,7 +52,8 @@ export default function TeacherDashboard() {
     deleteStudyMaterial,
     createAssignment,
     gradeSubmission,
-    submitDailyAttendance
+    submitDailyAttendance,
+    deleteSubmission // ✅ NEW: Added delete function from context
   } = useSchool();
 
   const teacher = currentUser as any;
@@ -103,6 +104,7 @@ export default function TeacherDashboard() {
 
   // Grading states
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
+  const [deletingSubId, setDeletingSubId] = useState<string | null>(null); // ✅ NEW: State for deleting submission
   const [inputGrade, setInputGrade] = useState('');
   const [inputFeedback, setInputFeedback] = useState('');
 
@@ -297,9 +299,12 @@ export default function TeacherDashboard() {
     setChatInput('');
   };
 
-  // ✅ SECURITY FIX: Filter submissions to only show those matching the teacher's assigned classes
+  const myAssignmentIds = assignments
+    .filter(a => a.uploadedBy === currentUser?.id)
+    .map(a => a.id);
+
   const teacherSubmissions = submissions.filter(s => 
-    teacher?.classes?.includes(s.classGrade)
+    myAssignmentIds.includes(s.assignmentId)
   );
 
   const filteredMessages = messages.filter(m => 
@@ -308,7 +313,6 @@ export default function TeacherDashboard() {
       : (m.senderId === currentUser?.id || m.receiverId === currentUser?.id)
   ).sort((a,b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-  // ✅ SECURITY FIX: Filter parent choices so teacher only sees parents of students in their assigned classes
   const parentChoices = parents
     .filter(p => p.childClass && teacher?.classes?.includes(p.childClass))
     .map(p => ({
@@ -417,7 +421,6 @@ export default function TeacherDashboard() {
         className="lg:col-span-3 space-y-6"
       >
 
-        {/* Dashboard completion banner helper */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row items-center gap-6 justify-between font-sans">
           <div className="space-y-1">
             <p className="text-xs text-slate-450 font-bold uppercase tracking-wider font-mono">Academic Achievement Stats</p>
@@ -442,7 +445,6 @@ export default function TeacherDashboard() {
         {activeSubTab === 'submissions' && (
           <div className="space-y-6">
             
-            {/* FULL WIDTH Submissions List with Inline Grading */}
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 font-sans">Pending & Graded Homeworks</h2>
@@ -455,6 +457,7 @@ export default function TeacherDashboard() {
                 <div className="space-y-5">
                   {teacherSubmissions.map(sub => {
                     const displayContent = decryptData(sub.submittedContent, 'SCHOOL_SECRET_KEY');
+                    
                     const isImage = displayContent.startsWith('data:image/');
                     const isOtherFile = displayContent.startsWith('data:') && !isImage;
                     
@@ -465,7 +468,6 @@ export default function TeacherDashboard() {
                     return (
                       <div key={sub.id} className="border border-slate-200 rounded-xl p-5 bg-slate-50/30 space-y-4 shadow-sm hover:border-blue-200 transition-colors">
                         
-                        {/* Header Details */}
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-slate-100 pb-3">
                           <div>
                             <p className="text-sm font-bold text-slate-800 font-sans">{sub.assignmentTitle}</p>
@@ -482,7 +484,6 @@ export default function TeacherDashboard() {
                           </span>
                         </div>
 
-                        {/* File Attachment Box */}
                         {sub.fileName && (
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-blue-50/50 border border-blue-100 rounded-lg p-3 text-xs">
                             <div className="flex items-center gap-2 min-w-0">
@@ -503,7 +504,6 @@ export default function TeacherDashboard() {
                           </div>
                         )}
 
-                        {/* Student Answer Text */}
                         <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
                           <div className="border-b border-slate-100 pb-1.5 font-sans">
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -526,7 +526,6 @@ export default function TeacherDashboard() {
                           </div>
                         </div>
 
-                        {/* Teacher's Existing Feedback */}
                         {sub.feedback && (
                           <div className="bg-emerald-50/40 p-3 rounded-lg border border-emerald-100 text-xs">
                             <p className="font-bold text-emerald-800 font-mono flex items-center gap-1.5">
@@ -537,8 +536,31 @@ export default function TeacherDashboard() {
                           </div>
                         )}
 
-                        {/* INLINE GRADING FORM */}
-                        {selectedSubId === sub.id ? (
+                        {/* ✅ NEW: Delete / Assess State Handling */}
+                        {deletingSubId === sub.id ? (
+                          <div className="mt-4 bg-red-50/50 p-3 rounded-lg border border-red-100 flex flex-col gap-2 animate-fade-in">
+                            <span className="text-[11px] font-bold text-red-700 uppercase tracking-wide font-mono text-center">Delete this record permanently?</span>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (deleteSubmission) deleteSubmission(sub.id);
+                                  setDeletingSubId(null);
+                                }}
+                                className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition shadow-sm cursor-pointer"
+                              >
+                                Confirm Delete
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletingSubId(null)}
+                                className="flex-1 py-2 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs rounded-lg transition cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : selectedSubId === sub.id ? (
                           <form onSubmit={handleGradeSubmit} className="mt-4 bg-slate-100 border border-slate-200 rounded-xl p-4 space-y-4 animate-fade-in">
                             <h4 className="text-xs font-bold text-blue-800 flex items-center gap-1.5 font-mono uppercase tracking-wide">
                               <Award className="w-4 h-4" /> Evaluate Submission
@@ -584,20 +606,30 @@ export default function TeacherDashboard() {
                             </div>
                           </form>
                         ) : (
-                          // Show 'Assess' button only if it's not graded
-                          sub.status !== 'GRADED' && (
+                          <div className="mt-3 flex gap-2">
+                            {sub.status !== 'GRADED' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedSubId(sub.id);
+                                  setInputGrade('');
+                                  setInputFeedback('');
+                                }}
+                                className="flex-1 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition cursor-pointer font-sans shadow-sm"
+                              >
+                                Assess & Give Marks
+                              </button>
+                            )}
                             <button
-                              onClick={() => {
-                                setSelectedSubId(sub.id);
-                                setInputGrade('');
-                                setInputFeedback('');
-                              }}
-                              className="mt-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition cursor-pointer font-sans shadow-sm w-full sm:w-fit"
+                              onClick={() => setDeletingSubId(sub.id)}
+                              className="px-4 py-2.5 bg-white border border-slate-200 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                              title="Delete this record to clear space"
                             >
-                              Assess & Give Marks
+                              <Trash2 className="w-4 h-4" />
+                              Delete Record
                             </button>
-                          )
+                          </div>
                         )}
+
                       </div>
                     );
                   })}
@@ -610,7 +642,6 @@ export default function TeacherDashboard() {
         {/* Upload Material */}
         {activeSubTab === 'material' && (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Upload Form */}
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6 xl:col-span-2">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 font-sans pb-1 justify-between">
@@ -622,7 +653,6 @@ export default function TeacherDashboard() {
                 <p className="text-xs text-slate-400 mt-1 font-sans">Upload handouts or syllabi, or directly link to Google Drive/Web Resources.</p>
               </div>
 
-              {/* Drag and Drop zone for Teacher Upload */}
               <div className="space-y-1.5 font-sans">
                 <label className="text-xs text-slate-500 font-bold uppercase tracking-wide">Option 1: Drag & Drop File</label>
                 <div
@@ -669,7 +699,6 @@ export default function TeacherDashboard() {
                 </div>
               </div>
 
-              {/* Link Input Area */}
               <div className="space-y-1.5 pt-2">
                 <label className="text-xs text-slate-500 font-bold uppercase tracking-wide">Option 2: Reference Link (Google Drive / Web)</label>
                 <div className="relative">
@@ -1053,7 +1082,7 @@ export default function TeacherDashboard() {
                 </div>
               </div>
 
-              {/* Right Box: Chat History Stream View (Synchronized with selected channel) */}
+              {/* Right Box: Chat History Stream View */}
               <div className="md:col-span-2 border border-slate-200 rounded-xl p-4 h-[420px] flex flex-col justify-between bg-slate-50/30 shadow-2xs">
                 <div className="border-b border-slate-100 pb-2 flex justify-between items-center">
                   <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide font-mono">
