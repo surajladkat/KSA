@@ -1297,125 +1297,135 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="p-5 overflow-y-auto flex-1 bg-white">
-              <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto">
-                <table className="w-full min-w-[1300px] text-xs text-left text-slate-500 border-collapse table-fixed">
-                  <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
-                    <tr>
-                      <th className="py-2.5 px-3 w-[160px]">Student Details</th>
-                      <th className="py-2.5 px-3 w-[160px]">Parent Details</th>
-                      <th className="py-2.5 px-3 w-[100px]">Class Grade</th>
-                      <th className="py-2.5 px-3 w-[180px]">Student Login Info</th>
-                      <th className="py-2.5 px-3 w-[180px] bg-amber-50/40 text-amber-900 border-l border-slate-100">Parent Login Info</th>
-                      <th className="py-2.5 px-3 w-[90px]">Total Fee</th>
-                      <th className="py-2.5 px-3 w-[90px]">Paid Fee</th>
-                      <th className="py-2.5 px-3 w-[90px]">Pending Fee</th>
-                      <th className="py-2.5 px-3 w-[100px]">Fee Status</th>
-                      <th className="py-2.5 px-3 w-[70px] text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {students
-                      .filter(s => 
-                        s.name.toLowerCase().includes(studentSearchText.toLowerCase()) ||
-                        s.classGrade.toLowerCase().includes(studentSearchText.toLowerCase()) ||
-                        s.studentIdCardNum.toLowerCase().includes(studentSearchText.toLowerCase()) ||
-                        s.username.toLowerCase().includes(studentSearchText.toLowerCase())
-                      )
-                      .map(s => {
-                        const linkedParent = parents.find(p => p.childId === s.id);
-                        return (
-                          <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-2.5 px-3 whitespace-normal break-words">
-                              <p className="font-bold text-slate-900">{s.name}</p>
-                              <p className="text-[10px] text-slate-400 font-mono">{s.studentIdCardNum}</p>
-                              {(s.seatNumber || s.benchNumber) && (
-                                <div className="mt-1 flex flex-wrap gap-1 text-[9px] font-mono leading-relaxed">
-                                  {s.seatNumber && <span className="bg-blue-50 text-blue-700 border border-blue-105 px-1.5 py-0.2 rounded">Seat: {s.seatNumber}</span>}
-                                  {s.benchNumber && <span className="bg-purple-50 text-purple-700 border border-purple-105 px-1.5 py-0.2 rounded">Bench: {s.benchNumber}</span>}
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-3 whitespace-normal break-words">
-                              {linkedParent ? (
-                                <div>
-                                  <p className="font-bold text-slate-700">{linkedParent.name}</p>
-                                  <p className="text-[10px] text-slate-400 font-mono">{linkedParent.relationship} • {linkedParent.mobileNumber}</p>
-                                </div>
-                              ) : (
-                                <span className="text-slate-400 italic text-[10px]">No linked parent</span>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">
-                              {s.classGrade}
-                            </td>
-                            <td className="py-2.5 px-3 whitespace-nowrap bg-blue-50/30">
-                              <div className="flex flex-col text-[10px] space-y-0.5">
-                                <span className="font-semibold text-slate-700">ID: <span className="font-bold text-blue-750 font-sans text-blue-700">{s.username}</span></span>
-                                <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{s.username}123</span></span>
-                              </div>
-                            </td>
-                            <td className="py-2.5 px-3 whitespace-nowrap bg-amber-50/30 border-l border-slate-100">
-                              {linkedParent ? (
-                                <div className="flex flex-col text-[10px] space-y-0.5">
-                                  <span className="font-semibold text-slate-700">ID: <span className="font-bold text-amber-700 font-sans">{linkedParent.username}</span></span>
-                                  <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{linkedParent.username}123</span></span>
-                                </div>
-                              ) : (
-                                <span className="text-slate-400 italic text-[10px]">No linked parent</span>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
-                            <td className="py-2.5 px-3 font-mono text-emerald-600 font-bold">₹{s.paidFee}</td>
-                            <td className="py-2.5 px-3 font-mono text-red-650 text-red-600 font-bold">₹{s.pendingFee}</td>
-                            <td className="py-2.5 px-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border ${
-                                s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                'bg-red-50 text-red-700 border-red-200'
-                              }`}>
-                                {s.paymentStatus}
-                              </span>
-                            </td>
-                            <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                              {confirmDeleteStudentId === s.id ? (
-                                <div className="flex items-center gap-1.5 justify-center">
-                                  <button
-                                    onClick={() => {
-                                      deleteStudent(s.id);
-                                      setConfirmDeleteStudentId(null);
-                                    }}
-                                    className="px-2 py-1 bg-red-650 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
-                                  >
-                                    Yes
-                                  </button>
-                                  <button
-                                    onClick={() => setConfirmDeleteStudentId(null)}
-                                    className="px-2 py-1 bg-slate-250 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
-                                  >
-                                    No
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => setConfirmDeleteStudentId(s.id)}
-                                  className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
-                                  title="Delete Student"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    }
-                  </tbody>
-                </table>
-              </div>
+          <div className="p-5 overflow-y-auto flex-1 bg-white">
+  {/* Added w-full and separated overflow-x-auto to an inner wrapper for flawless mobile scrolling */}
+  <div className="border border-slate-200 rounded-xl overflow-hidden w-full">
+    <div className="overflow-x-auto w-full">
+      {/* Removed table-fixed and lowered min-w so columns can compress naturally */}
+      <table className="w-full min-w-[1000px] text-xs text-left text-slate-500 border-collapse">
+        <thead className="text-[10px] text-slate-400 uppercase bg-slate-50 border-b border-slate-200 font-mono font-bold">
+          <tr>
+            <th className="py-2.5 px-3 min-w-[150px]">Student Details</th>
+            <th className="py-2.5 px-3 min-w-[150px]">Parent Details</th>
+            <th className="py-2.5 px-3 min-w-[160px]">Class Grade</th>
+            <th className="py-2.5 px-3 w-[160px]">Student Login Info</th>
+            <th className="py-2.5 px-3 w-[160px] bg-amber-50/40 text-amber-900 border-l border-slate-100">Parent Login Info</th>
+            <th className="py-2.5 px-3 w-[80px]">Total Fee</th>
+            <th className="py-2.5 px-3 w-[80px]">Paid Fee</th>
+            <th className="py-2.5 px-3 w-[80px]">Pending Fee</th>
+            <th className="py-2.5 px-3 w-[90px]">Fee Status</th>
+            <th className="py-2.5 px-3 w-[70px] text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 bg-white">
+          {students
+            .filter(s => 
+              s.name.toLowerCase().includes(studentSearchText.toLowerCase()) ||
+              s.classGrade.toLowerCase().includes(studentSearchText.toLowerCase()) ||
+              s.studentIdCardNum.toLowerCase().includes(studentSearchText.toLowerCase()) ||
+              s.username.toLowerCase().includes(studentSearchText.toLowerCase())
+            )
+            .map(s => {
+              const linkedParent = parents.find(p => p.childId === s.id);
+              return (
+                <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-2.5 px-3 whitespace-normal break-words">
+                    <p className="font-bold text-slate-900">{s.name}</p>
+                    <p className="text-[10px] text-slate-400 font-mono">{s.studentIdCardNum}</p>
+                    {(s.seatNumber || s.benchNumber) && (
+                      <div className="mt-1 flex flex-wrap gap-1 text-[9px] font-mono leading-relaxed">
+                        {s.seatNumber && <span className="bg-blue-50 text-blue-700 border border-blue-105 px-1.5 py-0.5 rounded">Seat: {s.seatNumber}</span>}
+                        {s.benchNumber && <span className="bg-purple-50 text-purple-700 border border-purple-105 px-1.5 py-0.5 rounded">Bench: {s.benchNumber}</span>}
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-3 whitespace-normal break-words">
+                    {linkedParent ? (
+                      <div>
+                        <p className="font-bold text-slate-700">{linkedParent.name}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">{linkedParent.relationship} • {linkedParent.mobileNumber}</p>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400 italic text-[10px]">No linked parent</span>
+                    )}
+                  </td>
+                  
+                  {/* FIX: Changed whitespace-nowrap to whitespace-normal and added badge styling for long class names */}
+                  <td className="py-2.5 px-3 min-w-[160px]">
+                    <span className="bg-indigo-50 text-indigo-700 text-[11px] px-2 py-1 rounded border border-indigo-100 font-semibold whitespace-normal leading-snug inline-block">
+                      {s.classGrade}
+                    </span>
+                  </td>
+
+                  <td className="py-2.5 px-3 whitespace-nowrap bg-blue-50/30">
+                    <div className="flex flex-col text-[10px] space-y-0.5">
+                      <span className="font-semibold text-slate-700">ID: <span className="font-bold text-blue-700 font-sans">{s.username}</span></span>
+                      <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{s.username}123</span></span>
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 whitespace-nowrap bg-amber-50/30 border-l border-slate-100">
+                    {linkedParent ? (
+                      <div className="flex flex-col text-[10px] space-y-0.5">
+                        <span className="font-semibold text-slate-700">ID: <span className="font-bold text-amber-700 font-sans">{linkedParent.username}</span></span>
+                        <span className="text-slate-500 font-mono">Pass: <span className="font-bold text-slate-700">{linkedParent.username}123</span></span>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400 italic text-[10px]">No linked parent</span>
+                    )}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono font-bold text-slate-700">₹{s.totalFee}</td>
+                  <td className="py-2.5 px-3 font-mono text-emerald-600 font-bold">₹{s.paidFee}</td>
+                  <td className="py-2.5 px-3 font-mono text-red-600 font-bold">₹{s.pendingFee}</td>
+                  <td className="py-2.5 px-3 whitespace-nowrap">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono tracking-wide border inline-block ${
+                      s.paymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      s.paymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-red-50 text-red-700 border-red-200'
+                    }`}>
+                      {s.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                    {confirmDeleteStudentId === s.id ? (
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <button
+                          onClick={() => {
+                            deleteStudent(s.id);
+                            setConfirmDeleteStudentId(null);
+                          }}
+                          className="px-2 py-1 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition cursor-pointer"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteStudentId(null)}
+                          className="px-2 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-semibold hover:bg-slate-300 transition cursor-pointer"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteStudentId(s.id)}
+                        className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition cursor-pointer inline-flex items-center justify-center"
+                        title="Delete Student"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
             </div>
           </div>
-        </div>
+       
       )}
 
       {showTeacherListModal && (

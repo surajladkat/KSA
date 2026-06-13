@@ -106,7 +106,9 @@ interface SchoolContextType {
   uploadStudyMaterial: (material: Omit<StudyMaterial, 'id' | 'uploadedBy' | 'uploadedAt'>) => Promise<void>;
   deleteStudyMaterial: (id: string) => Promise<void>;
   createAssignment: (asg: Omit<Assignment, 'id' | 'uploadedBy' | 'teacherName' | 'uploadedAt'>) => Promise<void>;
+  deleteAssignment: (id: string) => Promise<void>;
   gradeSubmission: (submissionId: string, grade: string, feedback: string) => Promise<void>;
+  deleteSubmission: (id: string) => Promise<void>;
 
   // Student
   submitAssignmentHomework: (assignmentId: string, content: string, fileName?: string, fileSize?: string) => Promise<void>;
@@ -525,6 +527,28 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     );
   };
 
+
+  // ─── Teacher: delete assignment ──────────────────────────────────────────────
+  const deleteAssignment = async (id: string) => {
+    if (!currentUser || currentUser.role !== "TEACHER") return;
+    const assignment = assignments.find(a => a.id === id);
+    if (!assignment) return;
+    const linkedSubmissions = submissions.filter(s => s.assignmentId === id);
+    await Promise.all(linkedSubmissions.map(s => deleteDocument(COLLECTIONS.SUBMISSIONS, s.id)));
+    await deleteDocument(COLLECTIONS.ASSIGNMENTS, id);
+    await logActivity(currentUser.id, currentUser.name, "TEACHER", `Deleted assignment: "${assignment.title}" (Class ${assignment.classGrade})`);
+    await addToastNotification(currentUser.id, "Assignment Deleted", `"${assignment.title}" and its submissions removed.`, "INFO");
+  };
+
+  // ─── Teacher: delete submission ──────────────────────────────────────────────
+  const deleteSubmission = async (id: string) => {
+    if (!currentUser || currentUser.role !== "TEACHER") return;
+    const sub = submissions.find(s => s.id === id);
+    if (!sub) return;
+    await deleteDocument(COLLECTIONS.SUBMISSIONS, id);
+    await logActivity(currentUser.id, currentUser.name, "TEACHER", `Deleted submission by ${sub.studentName} for "${sub.assignmentTitle}"`);
+  };
+
   // ─── Teacher: grade submission ───────────────────────────────────────────────
   const gradeSubmission = async (submissionId: string, grade: string, feedback: string) => {
     if (!currentUser || currentUser.role !== 'TEACHER') return;
@@ -731,7 +755,9 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         uploadStudyMaterial,
         deleteStudyMaterial,
         createAssignment,
+        deleteAssignment,
         gradeSubmission,
+        deleteSubmission,
         submitAssignmentHomework,
         sendMessage,
         addTimetableEntry,
