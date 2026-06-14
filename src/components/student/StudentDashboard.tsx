@@ -46,7 +46,8 @@ export default function StudentDashboard() {
     timetables,
     teachers,
     attendance,
-    submitAssignmentHomework
+    submitAssignmentHomework,
+    addToastNotification // ✅ NEW: Extracted for Library Entry Notification
   } = useSchool();
 
   const student = currentUser as any;
@@ -124,6 +125,28 @@ export default function StudentDashboard() {
     } catch (e) {
       console.error('Failed to download file', e);
       alert('There was an error decoding this file.');
+    }
+  };
+
+  // ✅ NEW: Function to handle daily library entry
+  const handleLibraryEntry = async () => {
+    if (!currentUser) return;
+    
+    // Find teacher assigned to Library, or fallback to Admin
+    const libraryTeacher = teachers.find(t => t.classes.includes('Library'));
+    const targetId = libraryTeacher ? libraryTeacher.id : 'admin-user-id-here';
+    
+    try {
+      await addToastNotification(
+        targetId,
+        'Library Entry Alert',
+        `${currentUser.name} (Seat: ${(currentUser as any).seatNumber || 'N/A'}) has marked their entry in the library.`,
+        'INFO'
+      );
+      alert("✅ Entry Recorded! The library instructor has been notified.");
+    } catch (error) {
+      console.error("Error marking entry", error);
+      alert("Failed to record entry. Please try again.");
     }
   };
 
@@ -295,6 +318,35 @@ export default function StudentDashboard() {
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="lg:col-span-3 space-y-6"
       >
+
+        {/* ✅ NEW: Strict Rules & Entry Panel (ONLY FOR LIBRARY STUDENTS) */}
+        {student?.classGrade === 'Library' && (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-5 shadow-sm space-y-4 mb-2">
+            <h3 className="text-sm font-black text-rose-800 flex items-center gap-2 uppercase tracking-wide font-mono">
+               Strict Library Protocols
+            </h3>
+            
+            <ul className="text-xs text-rose-700 space-y-2 font-medium">
+              <li className="flex items-start gap-1.5">
+                <span className="font-bold text-rose-600">1.</span> 
+                New members MUST clear their total library fee within <strong className="font-extrabold underline">3 Days</strong> of admission. Failure to do so will result in automatic removal from the library system.
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="font-bold text-rose-600">2.</span> 
+                Always mark your daily attendance. You must notify the teacher immediately upon entering the library premises.
+              </li>
+            </ul>
+
+            <div className="pt-2 border-t border-rose-200/50 mt-2">
+              <button 
+                onClick={handleLibraryEntry}
+                className="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-2"
+              >
+                 <CheckCircle2 className="w-4 h-4" /> Mark Daily Entry & Notify Teacher
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Warning Badge / Notification Banner for Pending Fees */}
         {student.pendingFee > 0 && (

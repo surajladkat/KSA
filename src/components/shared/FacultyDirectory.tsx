@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Search, GraduationCap, BookOpen, Layers } from 'lucide-react';
+import { Search, GraduationCap, BookOpen, Layers, Phone } from 'lucide-react'; // ✅ Added Phone icon
 import { TeacherUser } from '../../types';
 
 interface FacultyDirectoryProps {
@@ -97,8 +97,18 @@ export default function FacultyDirectory({ teachers }: FacultyDirectoryProps) {
                     </span>
                   </div>
 
+                  {/* ✅ NEW: Teacher Mobile Number Display */}
+                  {t.mobileNumber && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Phone className="w-3 h-3 text-emerald-600" />
+                      <span className="text-[11px] font-bold text-emerald-700 font-mono tracking-wide">
+                        {t.mobileNumber}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Subjects */}
-                  <div className="space-y-1">
+                  <div className="space-y-1 mt-2">
                     <p className="text-[10px] text-slate-400 uppercase font-mono font-bold flex items-center gap-1">
                       <BookOpen className="w-3 h-3 text-blue-500" /> Assigned Subjects
                     </p>

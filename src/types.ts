@@ -35,6 +35,7 @@ export interface TeacherUser extends User {
   role: 'TEACHER';
   subjects: string[];
   classes: ClassGrade[];
+  mobileNumber?: string; // ✅ NEW: Added to support Teacher's phone number visibility
 }
 
 export interface StudentUser extends User {

@@ -91,16 +91,18 @@ interface SchoolContextType {
     benchNumber?: string;
   }) => Promise<{ studentLogin: string; studentPass: string; parentLogin: string; parentPass: string }>;
 
+  // ✅ UPDATED: Added mobileNumber option for registering teacher
   registerTeacher: (data: {
     name: string;
     subjects: string[];
     classes: ClassGrade[];
+    mobileNumber?: string;
   }) => Promise<{ teacherLogin: string; teacherPass: string }>;
 
   updateStudentFee: (studentId: string, amountPaid: number) => Promise<void>;
   deleteStudent: (studentId: string) => Promise<void>;
   deleteTeacher: (teacherId: string) => Promise<void>;
-  clearAllLogs: () => Promise<void>; // ✅ DEFINED HERE FOR TYPESCRIPT
+  clearAllLogs: () => Promise<void>; 
 
   // Teacher
   uploadStudyMaterial: (material: Omit<StudyMaterial, 'id' | 'uploadedBy' | 'uploadedAt'>) => Promise<void>;
@@ -314,8 +316,28 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }) => {
     const sId = generateId('STU');
     const pId = generateId('PAR');
-    const studentUsername = generateStudentLoginId(data.classGrade);
-    const parentUsername  = generateParentLoginId(studentUsername);
+
+    // ✅ FIX: Get a short code for the class grade for cleaner IDs
+    const getShortClassCode = (grade: string) => {
+      if (grade.includes('9th Semi')) return '9SE';
+      if (grade.includes('9th CBSE')) return '9CB';
+      if (grade.includes('10th Semi')) return '10SE';
+      if (grade.includes('10th CBSE')) return '10CB';
+      if (grade === '11th Board') return '11B';
+      if (grade === '11th CET') return '11C';
+      if (grade === '11th Board + CET') return '11BC';
+      if (grade === '12th Board') return '12B';
+      if (grade === '12th CET') return '12C';
+      if (grade === '12th Board + CET') return '12BC';
+      if (grade === 'Library') return 'LIB';
+      return 'GEN';
+    };
+
+    const shortCode = getShortClassCode(data.classGrade);
+    const randomNum = Math.floor(100 + Math.random() * 900);
+
+    const studentUsername = `stu26-${shortCode}-${randomNum}`;
+    const parentUsername  = `par26-${shortCode}-${randomNum}`;
     const studentPassword = `${studentUsername}123`;
     const parentPassword  = `${parentUsername}123`;
 
@@ -329,7 +351,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       role: 'STUDENT',
       classGrade: data.classGrade,
       parentId: pId,
-      studentIdCardNum: `STU-${data.classGrade.replace('th', '')}-2026-${Math.floor(100 + Math.random() * 900)}`,
+      studentIdCardNum: `STU-${shortCode}-2026-${randomNum}`,
       createdAt: new Date().toISOString(),
       seatNumber: data.seatNumber || '',
       benchNumber: data.benchNumber || '',
@@ -369,9 +391,14 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   // ─── Admin: register teacher ─────────────────────────────────────────────────
-  const registerTeacher = async (data: { name: string; subjects: string[]; classes: ClassGrade[] }) => {
-    const tId             = generateId('TEACH');
-    const teacherUsername = generateTeacherLoginId(data.subjects[0] || 'gen');
+  const registerTeacher = async (data: { name: string; subjects: string[]; classes: ClassGrade[]; mobileNumber?: string; }) => {
+    const tId = generateId('TEACH');
+
+    // ✅ FIX: Clean up teacher subject name for short ID (e.g. Physics -> PHYS)
+    const firstSubject = (data.subjects[0] || 'GEN').split(',')[0].trim().substring(0, 4).toUpperCase();
+    const randomNum = Math.floor(100 + Math.random() * 900);
+
+    const teacherUsername = `tea26-${firstSubject}-${randomNum}`;
     const teacherPassword = `${teacherUsername}123`;
 
     const newTeacher: TeacherUser = {
@@ -381,6 +408,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       role: 'TEACHER',
       subjects: data.subjects,
       classes: data.classes,
+      mobileNumber: data.mobileNumber || '', // ✅ Saved mobile number to Database
       createdAt: new Date().toISOString(),
     };
 
@@ -451,7 +479,7 @@ export const SchoolProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     await addToastNotification(currentUser.id, 'Teacher Deleted', `${target.name} dismissed and removed.`, 'INFO');
   };
 
-  // ✅ SMART & SAFE LOG CLEARING (No missing imports)
+  // ✅ SMART & SAFE LOG CLEARING
   const clearAllLogs = async () => {
     if (!currentUser || currentUser.role !== 'ADMIN') return;
     try {
